@@ -1,0 +1,11 @@
+#!/bin/bash
+
+if [ ! -f blockchain.db ]; then
+  echo 'Downloading blockchain snapshot...'
+  wget http://downloads.lisk.io/blockchain.db.zip
+  [ $? = 1 ] || unzip blockchain.db.zip
+  [ $? = 0 ] || rm -f blockchain.db
+  rm blockchain.db.zip
+fi
+
+node app.js
