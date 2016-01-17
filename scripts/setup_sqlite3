@@ -15,7 +15,7 @@ exec_cmd() {
 }
 
 exec_cmd "wget -q http://archive.lisk.io/dists/lisk/Release.gpg -O- | sudo apt-key add -"
-exec_cmd "sudo apt-key adv --recv-keys --keyserver keyserver.ubuntu.com A39E6F530133E428"
+exec_cmd "sudo apt-key adv --recv-keys --keyserver keyserver.ubuntu.com 32AA98FA3BE478A1"
 exec_cmd "sudo rm -f /etc/apt/sources.list.d/lisk.list"
 exec_cmd "sudo sh -c \"echo 'deb [ arch=amd64 ] http://archive.lisk.io lisk main' > /etc/apt/sources.list.d/lisk.list\""
 exec_cmd "sudo apt-get update"
