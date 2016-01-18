@@ -12,23 +12,23 @@ RUN curl -sL https://deb.nodesource.com/setup_0.12 | sudo -E bash -
 RUN sudo apt-get install -y nodejs
 
 # Install SQLite3
-RUN curl -sL http://downloads.lisk.io/scripts/setup_sqlite3 | sudo -E bash -
+RUN curl -sL https://downloads.lisk.io/scripts/setup_sqlite3 | sudo -E bash -
 RUN sudo apt-get install -y sqlite3
 
 # Install Lisk
-RUN wget http://downloads.lisk.io/lisk-source.zip -O lisk-source.zip
+RUN wget https://downloads.lisk.io/lisk-source.zip -O lisk-source.zip
 RUN unzip lisk-source.zip -d lisk
 RUN rm lisk-source.zip
 WORKDIR lisk
 RUN npm install --production
 
 # Install Lisk Node
-RUN wget http://downloads.lisk.io/lisk-node.zip -O lisk-node.zip
+RUN wget https://downloads.lisk.io/lisk-node.zip -O lisk-node.zip
 RUN unzip lisk-node.zip
 RUN rm lisk-node.zip
 
 # Install Start Lisk
-RUN wget http://downloads.lisk.io/scripts/start_lisk -O start_lisk
+RUN wget https://downloads.lisk.io/scripts/start_lisk -O start_lisk
 RUN chmod ugo+x start_lisk
 
 ENV TOP=true
