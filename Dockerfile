@@ -17,7 +17,8 @@ RUN sudo apt-get install -y sqlite3
 
 # Install Lisk
 RUN wget https://downloads.lisk.io/lisk-source.zip -O lisk-source.zip
-RUN unzip lisk-source.zip -d lisk
+RUN unzip lisk-source.zip
+RUN mv -f $(ls -d * | head -1) lisk
 RUN rm lisk-source.zip
 WORKDIR lisk
 RUN npm install --production
