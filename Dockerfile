@@ -35,5 +35,5 @@ RUN chmod ugo+x start_lisk
 ENV TOP=true
 ENV TERM=xterm
 
-EXPOSE 8040
+EXPOSE 7000
 ENTRYPOINT ./start_lisk
