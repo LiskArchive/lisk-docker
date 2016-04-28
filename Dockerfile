@@ -1,6 +1,6 @@
 FROM ubuntu
 MAINTAINER LiskHQ
-LABEL description="Lisk Docker Image" version="1.0.0"
+LABEL description="Lisk Docker Image" version="1.1.0"
 
 # Install Essentials
 WORKDIR /~
