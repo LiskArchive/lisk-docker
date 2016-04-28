@@ -16,8 +16,8 @@ RUN curl -sL https://downloads.lisk.io/scripts/setup_postgres.Linux | sudo -E ba
 RUN sudo service postgresql start
 
 # Configure PostgreSQL
-RUN sudo postgres createuser --createdb lisk
-RUN sudo postgres psql -c "ALTER USER 'lisk' WITH PASSWORD 'password';"
+RUN sudo -u postgres createuser --createdb lisk
+RUN sudo -u postgres psql -c "ALTER USER 'lisk' WITH PASSWORD 'password';"
 RUN createdb lisk_test
 
 # Install Lisk
