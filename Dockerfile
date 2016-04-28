@@ -14,6 +14,11 @@ RUN sudo apt-get install -y nodejs
 # Install PostgreSQL
 RUN curl -sL https://downloads.lisk.io/scripts/setup_postgres.Linux | sudo -E bash -
 
+# Configure PostgreSQL
+RUN sudo postgres createuser --createdb lisk
+RUN sudo postgres psql -c "ALTER USER 'lisk' WITH PASSWORD 'password';"
+RUN createdb lisk_test
+
 # Install Lisk
 RUN wget https://downloads.lisk.io/lisk/test/lisk-source.tar.gz -O lisk-source.tar.gz
 RUN tar -zxvf lisk-source.tar.gz
