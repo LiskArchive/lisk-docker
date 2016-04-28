@@ -1,0 +1,23 @@
+#!/bin/bash
+
+bail() {
+  echo "Error executing command, exiting"
+  exit 1
+}
+
+exec_cmd_nobail() {
+  echo "+ $1"
+  bash -c "$1"
+}
+
+exec_cmd() {
+  exec_cmd_nobail "$1" || bail
+}
+
+exec_cmd "pkg install postgresql95-server-9.5.2 postgresql95-contrib-9.5.2"
+exec_cmd "sysrc postgresql_enable=yes"
+exec_cmd "mkdir -p /usr/local/pgsql/data"
+exec_cmd "chmod 700 /usr/local/pgsql/data"
+exec_cmd "chown pgsql:pgsql /usr/local/pgsql/data"
+exec_cmd "service postgresql initdb"
+exec_cmd "service postgresql start"
