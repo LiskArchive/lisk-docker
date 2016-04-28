@@ -14,7 +14,10 @@ exec_cmd() {
   exec_cmd_nobail "$1" || bail
 }
 
-exec_cmd "/usr/bin/ruby -e \"$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)\""
-exec_cmd "brew update"
-exec_cmd "brew install postgresql"
-exec_cmd "brew services start postgresql"
+if [ ! $(command -v "brew") ]; then
+  ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+else
+  exec_cmd "brew update"
+  exec_cmd "brew install postgresql"
+  exec_cmd "brew services start postgresql"
+fi
