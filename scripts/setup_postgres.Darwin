@@ -1,0 +1,20 @@
+#!/bin/bash
+
+bail() {
+  echo "Error executing command, exiting"
+  exit 1
+}
+
+exec_cmd_nobail() {
+  echo "+ $1"
+  bash -c "$1"
+}
+
+exec_cmd() {
+  exec_cmd_nobail "$1" || bail
+}
+
+exec_cmd "/usr/bin/ruby -e \"$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)\""
+exec_cmd "brew update"
+exec_cmd "brew install postgresql"
+exec_cmd "brew services start postgresql"
