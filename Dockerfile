@@ -11,9 +11,8 @@ RUN sudo apt-get install -y build-essential curl git gunzip nano python wget tar
 RUN curl -sL https://deb.nodesource.com/setup_0.12 | sudo -E bash -
 RUN sudo apt-get install -y nodejs
 
-# Install PostgreSQL:
-RUN curl -sL https://downloads.lisk.io/scripts/setup_postgresql | sudo -E bash -
-RUN sudo apt-get install -y postgresql postgresql-contrib;
+# Install PostgreSQL
+RUN curl -sL https://downloads.lisk.io/scripts/setup_postgres.Linux | sudo -E bash -
 
 # Install Lisk
 RUN wget https://downloads.lisk.io/lisk/test/lisk-source.tar.gz -O lisk-source.tar.gz
