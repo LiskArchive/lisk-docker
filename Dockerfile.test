@@ -17,7 +17,7 @@ RUN sudo service postgresql start
 
 # Configure PostgreSQL
 RUN sudo -u postgres createuser --createdb lisk
-RUN sudo -u postgres psql -c "ALTER USER 'lisk' WITH PASSWORD 'password';"
+RUN sudo -u postgres psql -c "ALTER USER \"lisk\" WITH PASSWORD 'password';"
 RUN createdb lisk_test
 
 # Install Lisk
