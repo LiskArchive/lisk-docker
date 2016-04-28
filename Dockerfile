@@ -11,12 +11,12 @@ RUN sudo apt-get install -y build-essential curl git nano python wget unzip
 RUN curl -sL https://deb.nodesource.com/setup_0.12 | sudo -E bash -
 RUN sudo apt-get install -y nodejs
 
-# Install SQLite3
-RUN curl -sL https://downloads.lisk.io/scripts/setup_sqlite3 | sudo -E bash -
-RUN sudo apt-get install -y sqlite3
+# Install PostgreSQL:
+RUN curl -sL https://downloads.lisk.io/scripts/setup_postgresql | sudo -E bash -
+RUN sudo apt-get install -y postgresql postgresql-contrib;
 
 # Install Lisk
-RUN wget https://downloads.lisk.io/lisk-source.zip -O lisk-source.zip
+RUN wget https://downloads.lisk.io/lisk/test/lisk-source.zip -O lisk-source.zip
 RUN unzip lisk-source.zip
 RUN mv -f $(ls -d * | head -1) lisk
 RUN rm lisk-source.zip
@@ -24,7 +24,7 @@ WORKDIR lisk
 RUN npm install --production
 
 # Install Lisk Node
-RUN wget https://downloads.lisk.io/lisk-node.zip -O lisk-node.zip
+RUN wget https://downloads.lisk.io/lisk/test/lisk-node.zip -O lisk-node.zip
 RUN unzip lisk-node.zip
 RUN rm lisk-node.zip
 
