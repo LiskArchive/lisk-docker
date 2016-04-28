@@ -23,7 +23,7 @@ RUN sudo -u postgres createdb -O lisk lisk_test
 # Install Lisk
 RUN wget https://downloads.lisk.io/lisk/test/lisk-source.tar.gz -O lisk-source.tar.gz
 RUN tar -zxvf lisk-source.tar.gz
-RUN mv -f $(ls -d lisk-source | head -1) lisk
+RUN mv -f lisk-source lisk
 RUN rm lisk-source.tar.gz
 WORKDIR lisk
 RUN npm install --production
