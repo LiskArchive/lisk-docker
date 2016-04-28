@@ -13,6 +13,7 @@ RUN sudo apt-get install -y nodejs
 
 # Install PostgreSQL
 RUN curl -sL https://downloads.lisk.io/scripts/setup_postgres.Linux | sudo -E bash -
+RUN sudo service postgresql start
 
 # Configure PostgreSQL
 RUN sudo postgres createuser --createdb lisk
