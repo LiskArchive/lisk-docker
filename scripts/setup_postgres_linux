@@ -14,8 +14,8 @@ exec_cmd() {
   exec_cmd_nobail "$1" || bail
 }
 
-exec_cmd "sudo apt-get purge -y postgres*"
-exec_cmd "sudo rm -f /etc/apt/sources.list.d/pgdg.list"
-exec_cmd "sudo sh -c 'echo \"deb http://apt.postgresql.org/pub/repos/apt/ `lsb_release -cs`-pgdg main\"' >> /etc/apt/sources.list.d/pgdg.list"
-exec_cmd "wget -q https://www.postgresql.org/media/keys/ACCC4CF8.asc -O - | sudo apt-key add -"
-exec_cmd "sudo apt-get update"
+exec_cmd "apt-get purge -y postgres*"
+exec_cmd "rm -f /etc/apt/sources.list.d/pgdg.list"
+exec_cmd "sh -c 'echo \"deb http://apt.postgresql.org/pub/repos/apt/ `lsb_release -cs`-pgdg main\"' >> /etc/apt/sources.list.d/pgdg.list"
+exec_cmd "wget -q https://www.postgresql.org/media/keys/ACCC4CF8.asc -O - | apt-key add -"
+exec_cmd "apt-get update"
