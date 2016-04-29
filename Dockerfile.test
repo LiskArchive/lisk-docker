@@ -20,6 +20,12 @@ RUN sudo -u postgres createuser --createdb lisk
 RUN sudo -u postgres psql -c "ALTER USER \"lisk\" WITH PASSWORD 'password';"
 RUN sudo -u postgres createdb -O lisk lisk_test
 
+# Add Lisk User
+RUN useradd lisk -s /bin/bash -m
+RUN echo "lisk:password" | chpasswd
+RUN echo "%lisk ALL=(ALL) ALL" >> /etc/sudoers
+USER lisk
+
 # Install Lisk
 RUN wget https://downloads.lisk.io/lisk/test/lisk-source.tar.gz -O lisk-source.tar.gz
 RUN tar -zxvf lisk-source.tar.gz
