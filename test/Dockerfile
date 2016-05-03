@@ -12,7 +12,8 @@ RUN curl -sL https://deb.nodesource.com/setup_0.12 | -E bash -
 RUN apt-get install -y nodejs
 
 # Install PostgreSQL
-RUN curl -sL https://downloads.lisk.io/scripts/setup_postgresql.Linux | -E bash -
+ADD setup_postgresql.Linux /~
+RUN bash setup_postgresql.Linux
 
 # Add Lisk User
 RUN useradd lisk -s /bin/bash -m
@@ -41,7 +42,7 @@ RUN tar -zxvf lisk-node-Linux-x86_64.tar.gz
 RUN rm lisk-node-Linux-x86_64.tar.gz
 
 # Install Start Lisk
-RUN wget https://downloads.lisk.io/scripts/start_lisk -O start_lisk
+ADD start_lisk /home/lisk/lisk
 RUN chmod ugo+x start_lisk
 
 ENV TOP=true
