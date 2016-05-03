@@ -18,7 +18,6 @@ RUN curl -sL https://downloads.lisk.io/scripts/setup_postgresql.Linux | -E bash 
 RUN useradd lisk -s /bin/bash -m
 RUN echo "lisk:password" | chpasswd
 RUN echo "%lisk ALL=(ALL) ALL" >> /etc/sudoers
-USER lisk
 
 # Configure PostgreSQL
 RUN /etc/init.d/postgresql start && \
@@ -27,6 +26,7 @@ RUN /etc/init.d/postgresql start && \
     sudo -u lisk createdb -O lisk lisk_test
 
 # Install Lisk
+USER lisk
 RUN wget https://downloads.lisk.io/lisk/test/lisk-source.tar.gz -O lisk-source.tar.gz
 RUN tar -zxvf lisk-source.tar.gz
 RUN mv -f lisk-source lisk
