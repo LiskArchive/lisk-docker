@@ -4,15 +4,15 @@ LABEL description="Lisk Docker Image" version="1.1.0"
 
 # Install Essentials
 WORKDIR /~
-RUN sudo apt-get update
-RUN sudo apt-get install -y build-essential curl git gzip nano python wget tar
+RUN apt-get update
+RUN apt-get install -y build-essential curl git gzip nano python wget tar
 
 # Install Node.js
-RUN curl -sL https://deb.nodesource.com/setup_0.12 | sudo -E bash -
-RUN sudo apt-get install -y nodejs
+RUN curl -sL https://deb.nodesource.com/setup_0.12 | -E bash -
+RUN apt-get install -y nodejs
 
 # Install PostgreSQL
-RUN curl -sL https://downloads.lisk.io/scripts/setup_postgresql.Linux | sudo -E bash -
+RUN curl -sL https://downloads.lisk.io/scripts/setup_postgresql.Linux | -E bash -
 
 # Add Lisk User
 RUN useradd lisk -s /bin/bash -m
@@ -21,7 +21,7 @@ RUN echo "%lisk ALL=(ALL) ALL" >> /etc/sudoers
 USER lisk
 
 # Configure PostgreSQL
-RUN sudo /etc/init.d/postgresql start && \
+RUN /etc/init.d/postgresql start && \
     sudo -u postgres createuser --createdb lisk && \
     sudo -u postgres psql -c "ALTER USER \"lisk\" WITH PASSWORD 'password';" && \
     sudo -u lisk createdb -O lisk lisk_test
