@@ -52,4 +52,4 @@ ENV TOP=true
 ENV TERM=xterm
 
 EXPOSE 7000
-ENTRYPOINT ./start_lisk
+ENTRYPOINT ./start_lisk test
