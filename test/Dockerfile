@@ -1,4 +1,4 @@
-FROM ubuntu
+FROM ubuntu:trusty
 MAINTAINER LiskHQ
 LABEL description="Lisk Docker Image" version="1.1.0"
 
