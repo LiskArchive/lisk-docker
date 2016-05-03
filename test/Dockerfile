@@ -23,7 +23,7 @@ RUN echo "%lisk ALL=(ALL) ALL" >> /etc/sudoers
 RUN /etc/init.d/postgresql start && \
     sudo -u postgres createuser --createdb lisk && \
     sudo -u postgres psql -c "ALTER USER \"lisk\" WITH PASSWORD 'password';" && \
-    sudo -u lisk createdb -O lisk lisk_test
+    sudo -u postgres createdb -O lisk lisk_test
 
 # Install Lisk
 USER lisk
