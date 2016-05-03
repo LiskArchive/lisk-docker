@@ -1,3 +1,89 @@
+# Lisk Docker
+
+**The official Lisk docker image.** This document details how to build your own version of the image. If all you want to do is install the official Lisk docker image, please read the following: https://lisk.io/documentation?i=lisk-docs/DockerInstall
+
+***
+
+## Build Instructions
+
+**NOTE:** The following is applicable to: **Ubuntu 14.04 (LTS) - x86_64**.
+
+If you are new to docker, we highly recommend reading the [Official Docker Documentation](https://docs.docker.com/) before proceeding.
+
+#### 1. Install Docker
+
+```
+curl -sL https://downloads.lisk.io/scripts/setup_docker.Linux | sudo -E bash -
+sudo apt-get install -y docker-engine
+```
+
+Add the current user to a new docker group (avoids having to use sudo for each command):
+
+```
+sudo groupadd docker
+sudo gpasswd -a ${USER} docker
+sudo service docker restart
+```
+
+#### 2. Log into Docker
+
+```
+docker login username
+```
+
+**NOTE:** If you don't have a docker account you can sign up [here](https://hub.docker.com/).
+
+#### 3. Build the image
+
+```
+docker build -t username/lisk:latest -f Dockerfile.test .
+```
+
+#### 4. Tag the image
+
+```
+docker tag username/lisk:latest username/lisk:version
+```
+
+#### 5. Push the image
+
+```
+docker push username/lisk
+```
+
+#### 6. Run the image
+
+```
+docker run -d --restart=always -p 0.0.0.0:7000:7000 username/lisk
+```
+
+For more details please read: https://lisk.io/documentation?i=lisk-docs/DockerInstall
+
+#### 7. Archive the image
+
+```
+docker save username/lisk > lisk-docker.tar
+gzip -9 lisk-docker.tar.gz
+```
+
+***
+
+## Useful Commands
+
+#### Removing dangling images
+
+```
+docker rmi $(docker images -q -f "dangling=true")
+```
+
+#### Removing exited containers
+
+```
+docker rm $(docker ps -q -f status=exited)
+```
+
+***
+
 ## License
   
 The MIT License (MIT)  
