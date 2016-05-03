@@ -18,7 +18,7 @@ RUN bash setup_postgresql.Linux
 # Add Lisk User
 RUN useradd lisk -s /bin/bash -m
 RUN echo "lisk:password" | chpasswd
-RUN echo "%lisk ALL=(ALL) ALL" >> /etc/sudoers
+RUN echo "%lisk ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 
 # Configure PostgreSQL
 RUN /etc/init.d/postgresql start && \
