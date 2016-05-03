@@ -12,7 +12,7 @@ RUN curl -sL https://deb.nodesource.com/setup_0.12 | sudo -E bash -
 RUN sudo apt-get install -y nodejs
 
 # Install PostgreSQL
-RUN curl -sL https://downloads.lisk.io/scripts/setup_postgres.Linux | sudo -E bash -
+RUN curl -sL https://downloads.lisk.io/scripts/setup_postgresql.Linux | sudo -E bash -
 RUN sudo service postgresql start
 
 # Configure PostgreSQL
