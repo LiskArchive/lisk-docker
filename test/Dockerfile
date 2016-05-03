@@ -8,7 +8,7 @@ RUN apt-get update
 RUN apt-get install -y build-essential curl git gzip nano python wget tar
 
 # Install Node.js
-RUN curl -sL https://deb.nodesource.com/setup_0.12 | -E bash -
+RUN curl -sL https://deb.nodesource.com/setup_0.12 | bash -
 RUN apt-get install -y nodejs
 
 # Install PostgreSQL
