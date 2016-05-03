@@ -27,6 +27,7 @@ RUN /etc/init.d/postgresql start && \
 
 # Install Lisk
 USER lisk
+WORKDIR /home/lisk
 RUN wget https://downloads.lisk.io/lisk/test/lisk-source.tar.gz -O lisk-source.tar.gz
 RUN tar -zxvf lisk-source.tar.gz
 RUN mv -f lisk-source lisk
