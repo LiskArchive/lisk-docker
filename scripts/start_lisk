@@ -1,0 +1,50 @@
+#!/bin/bash
+
+$NETWORK="$1"
+
+if [ "$NETWORK" != "test" ] && [ "$NETWORK" != "main" ]; then
+  echo "X Invalid first argument (must be test or main)."
+  exit 1
+else
+  $DB_NAME="lisk_$NETWORK"
+fi
+
+download_blockchain() {
+  echo "Downloading blockchain snapshot..."
+  curl -o blockchain.db.gz "https://downloads.lisk.io/lisk/$NETWORK/blockchain.db.gz" &> /dev/null
+  if [ $? == 0 ] && [ -f blockchain.db.gz ]; then
+    gunzip -q blockchain.db.gz &> /dev/null
+  fi
+  if [ $? != 0 ]; then
+    rm -f blockchain.*
+    echo "X Failed to download blockchain snapshot."
+    exit 1
+  else
+    echo "√ Blockchain snapshot downloaded successfully."
+  fi
+}
+
+restore_blockchain() {
+  echo "Restoring blockchain..."
+  if [ -f blockchain.db ]; then
+    psql -qd "$DB_NAME" < blockchain.db &> /dev/null
+  fi
+  rm -f blockchain.*
+  if [ $? != 0 ]; then
+    echo "X Failed to restore blockchain."
+    exit 1
+  else
+    echo "√ Blockchain restored successfully."
+  fi
+}
+
+populate_database() {
+  psql -ltAq | grep -q "^$DB_NAME|" &> /dev/null
+  if [ $? == 0 ]; then
+    download_blockchain
+    restore_blockchain
+  fi
+}
+
+populate_database
+node app.js
