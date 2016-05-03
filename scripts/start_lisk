@@ -1,12 +1,12 @@
 #!/bin/bash
 
-$NETWORK="$1"
+NETWORK="$1"
 
 if [ "$NETWORK" != "test" ] && [ "$NETWORK" != "main" ]; then
   echo "X Invalid first argument (must be test or main)."
   exit 1
 else
-  $DB_NAME="lisk_$NETWORK"
+  DB_NAME="lisk_$NETWORK"
 fi
 
 download_blockchain() {
