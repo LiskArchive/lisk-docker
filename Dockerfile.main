@@ -51,5 +51,5 @@ USER lisk
 ENV TOP=true
 ENV TERM=xterm
 
-EXPOSE 7000
+EXPOSE 8000
 ENTRYPOINT ./start_lisk main
