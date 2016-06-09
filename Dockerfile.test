@@ -1,6 +1,6 @@
 FROM ubuntu:trusty
 MAINTAINER LiskHQ
-LABEL description="Lisk Docker Image" version="1.2.0"
+LABEL description="Lisk Docker Image - Testnet" version="1.2.0"
 
 # Install Essentials
 WORKDIR /~
@@ -57,8 +57,10 @@ RUN sudo npm install -g .
 # Install a preshared ssh key 
 # for github public read access via lisk-cli dapps -a
 ADD ./.ssh /home/lisk/.ssh
-RUN sudo chown -R lisk /home/lisk/.ssh
-RUN sudo chgrp -R lisk /home/lisk/.ssh
+
+# correct file ownership
+RUN sudo chown -R lisk /home/lisk
+RUN sudo chgrp -R lisk /home/lisk
 
 ENV TOP=true
 ENV TERM=xterm
