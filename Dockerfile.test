@@ -48,8 +48,21 @@ RUN chown lisk:lisk start_lisk
 RUN chmod ug+x start_lisk
 USER lisk
 
+# Install lisk-cli
+WORKDIR /home/lisk
+RUN git clone https://github.com/LiskHQ/lisk-cli.git lisk-cli.git
+WORKDIR /home/lisk/lisk-cli.git
+RUN sudo npm install -g .
+
+# Install a preshared ssh key 
+# for github public read access via lisk-cli dapps -a
+ADD ./.ssh /home/lisk/.ssh
+RUN sudo chown -R lisk /home/lisk/.ssh
+RUN sudo chgrp -R lisk /home/lisk/.ssh
+
 ENV TOP=true
 ENV TERM=xterm
 
+WORKDIR /home/lisk/lisk
 EXPOSE 7000
 ENTRYPOINT ./start_lisk test
