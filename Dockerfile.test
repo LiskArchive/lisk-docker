@@ -61,6 +61,7 @@ ADD ./.ssh /home/lisk/.ssh
 # correct file ownership
 RUN sudo chown -R lisk /home/lisk
 RUN sudo chgrp -R lisk /home/lisk
+RUN sudo chmod 600 ~/.ssh/*
 
 ENV TOP=true
 ENV TERM=xterm
