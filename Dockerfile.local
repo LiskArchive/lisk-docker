@@ -29,11 +29,15 @@ RUN /etc/init.d/postgresql start && \
 # Install Lisk
 USER lisk
 WORKDIR /home/lisk
-RUN wget https://downloads.lisk.io/lisk/main/lisk-source.tar.gz -O lisk-source.tar.gz
-RUN tar -zxvf lisk-source.tar.gz
-RUN mv -f lisk-source lisk
-RUN rm lisk-source.tar.gz
-WORKDIR lisk
+RUN git clone https://github.com/LiskHQ/lisk.git lisk
+WORKDIR /home/lisk/lisk
+# set container to use test config from ./test
+# passphrase: wagon stock borrow episode laundry kitten salute link globe zero feed marble
+RUN cp ./test/config.json ./config.json
+RUN cp ./test/genesisBlock.json ./genesisBlock.json
+RUN cp ./test/genesisDelegates.json ./genesisDelegates.json
+# fix "database" setting
+RUN sed -i s/lisk_test/lisk_local/g config.json
 RUN npm install --production
 
 # Install Lisk Node
@@ -58,14 +62,6 @@ RUN sudo npm install -g .
 # for github public read access via lisk-cli dapps -a
 ADD ./.ssh /home/lisk/.ssh
  
-# add Lisk test config from https://github.com/LiskHQ/lisk
-# passphrase: wagon stock borrow episode laundry kitten salute link globe zero feed marble
-WORKDIR /home/lisk/lisk
-RUN wget https://github.com/LiskHQ/lisk/raw/development/test/config.json -O config.json
-RUN wget https://github.com/LiskHQ/lisk/raw/development/test/genesisBlock.json -O genesisBlock.json
-RUN wget https://github.com/LiskHQ/lisk/raw/development/test/genesisDelegates.json -O genesisDelegates.json
-RUN sed -i s/lisk_test/lisk_local/g config.json
-
 # correct file ownership
 RUN sudo chown -R lisk /home/lisk
 RUN sudo chgrp -R lisk /home/lisk
