@@ -29,8 +29,9 @@ RUN /etc/init.d/postgresql start && \
 # Install Lisk
 USER lisk
 WORKDIR /home/lisk
-RUN git clone https://github.com/LiskHQ/lisk.git lisk
-WORKDIR /home/lisk/lisk
+RUN git clone --recursive https://github.com/LiskHQ/lisk.git lisk
+WORKDIR lisk
+RUN npm install --production
 # set container to use test config from ./test
 # passphrase: wagon stock borrow episode laundry kitten salute link globe zero feed marble
 RUN cp ./test/config.json ./config.json
@@ -38,7 +39,6 @@ RUN cp ./test/genesisBlock.json ./genesisBlock.json
 RUN cp ./test/genesisDelegates.json ./genesisDelegates.json
 # fix "database" setting
 RUN sed -i s/lisk_test/lisk_local/g config.json
-RUN npm install --production
 
 # Install Lisk Node
 RUN wget https://downloads.lisk.io/lisk-node/lisk-node-Linux-x86_64.tar.gz -O lisk-node-Linux-x86_64.tar.gz
