@@ -20,6 +20,13 @@ RUN useradd lisk -s /bin/bash -m
 RUN echo "lisk:password" | chpasswd
 RUN echo "%lisk ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 
+# Install a preshared ssh key
+# for github public read access via lisk-cli dapps -a
+ADD ./.ssh /home/lisk/.ssh
+RUN chown -R lisk /home/lisk/.ssh
+RUN chgrp -R lisk /home/lisk/.ssh
+RUN chmod 600 /home/lisk/.ssh/*
+
 # Configure PostgreSQL
 RUN /etc/init.d/postgresql start && \
     sudo -u postgres createuser --createdb lisk && \
@@ -51,17 +58,8 @@ USER lisk
 # Install lisk-cli
 WORKDIR /home/lisk
 RUN git clone https://github.com/LiskHQ/lisk-cli.git lisk-cli.git
-WORKDIR /home/lisk/lisk-cli.git
+WORKDIR lisk-cli.git
 RUN sudo npm install -g .
-
-# Install a preshared ssh key 
-# for github public read access via lisk-cli dapps -a
-ADD ./.ssh /home/lisk/.ssh
-
-# correct file ownership
-RUN sudo chown -R lisk /home/lisk
-RUN sudo chgrp -R lisk /home/lisk
-RUN sudo chmod 600 ~/.ssh/*
 
 ENV TOP=true
 ENV TERM=xterm
