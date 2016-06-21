@@ -25,8 +25,7 @@ RUN echo "%lisk ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 # Install a preshared ssh key
 # for github public read access via lisk-cli dapps -a
 ADD ./.ssh /home/lisk/.ssh
-RUN chown -R lisk /home/lisk/.ssh
-RUN chgrp -R lisk /home/lisk/.ssh
+RUN chown -R lisk:lisk /home/lisk/.ssh
 RUN chmod 600 /home/lisk/.ssh/*
 
 # Configure PostgreSQL
@@ -38,15 +37,15 @@ RUN /etc/init.d/postgresql start && \
 # Install Lisk
 USER lisk
 WORKDIR /home/lisk
-RUN git clone --recursive https://github.com/LiskHQ/lisk.git lisk
+#RUN git clone --recursive https://github.com/LiskHQ/lisk.git lisk
+RUN git clone --recursive https://github.com/m-schmoock/lisk.git lisk
 WORKDIR lisk
 RUN npm install --production
 # set container to use test config from ./test
-# passphrase: wagon stock borrow episode laundry kitten salute link globe zero feed marble
 RUN cp ./test/config.json ./config.json
 RUN cp ./test/genesisBlock.json ./genesisBlock.json
 RUN cp ./test/genesisDelegates.json ./genesisDelegates.json
-# fix "database" setting
+# fix config.json database to lisk_local
 RUN sed -i s/lisk_test/lisk_local/g config.json
 
 # Install Lisk Node
@@ -63,14 +62,17 @@ USER lisk
 
 # Build the user-interface
 WORKDIR public
+# hint local testing passphrase everywhere
+RUN sed -i "s/Your Passphrase/wagon stock borrow episode laundry kitten salute link globe zero feed marble/g" partials/*.html partials/modals/*.html
 RUN npm install
 RUN bower install
 RUN grunt release
 
 # Install lisk-cli
 WORKDIR /home/lisk
-RUN git clone https://github.com/LiskHQ/lisk-cli.git lisk-cli.git
-WORKDIR lisk-cli.git
+#RUN git clone https://github.com/LiskHQ/lisk-cli.git
+RUN git clone https://github.com/m-schmoock/lisk-cli.git
+WORKDIR lisk-cli
 RUN sudo npm install -g .
  
 ENV TOP=true
