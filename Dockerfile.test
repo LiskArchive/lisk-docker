@@ -3,7 +3,7 @@ MAINTAINER LiskHQ
 LABEL description="Lisk Docker Image - Testnet" version="1.2.0"
 
 # Install Essentials
-WORKDIR /~
+WORKDIR /root
 RUN apt-get update
 RUN apt-get install -y build-essential curl git gzip nano python wget tar
 
@@ -12,19 +12,13 @@ RUN curl -sL https://deb.nodesource.com/setup_0.12 | bash -
 RUN apt-get install -y nodejs
 
 # Install PostgreSQL
-ADD scripts/setup_postgresql.Linux /~
-RUN bash setup_postgresql.Linux
+ADD scripts/setup_postgresql.Linux ./
+RUN bash ./setup_postgresql.Linux
 
 # Add Lisk User
 RUN useradd lisk -s /bin/bash -m
 RUN echo "lisk:password" | chpasswd
 RUN echo "%lisk ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
-
-# Install a preshared ssh key
-# for github public read access via lisk-cli dapps -a
-ADD ./.ssh /home/lisk/.ssh
-RUN chown -R lisk:lisk /home/lisk/.ssh
-RUN chmod 600 /home/lisk/.ssh/*
 
 # Configure PostgreSQL
 RUN /etc/init.d/postgresql start && \
@@ -53,12 +47,6 @@ ADD scripts/start_lisk /home/lisk/lisk
 RUN chown lisk:lisk start_lisk
 RUN chmod ug+x start_lisk
 USER lisk
-
-# Install lisk-cli
-WORKDIR /home/lisk
-RUN git clone https://github.com/LiskHQ/lisk-cli.git
-WORKDIR lisk-cli
-RUN sudo npm install -g .
 
 ENV TOP=true
 ENV TERM=xterm
