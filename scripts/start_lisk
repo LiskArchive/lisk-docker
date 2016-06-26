@@ -47,5 +47,6 @@ populate_database() {
 }
 
 sudo service postgresql start
+sleep 60 # give postgres a chance to start
 populate_database
 node app.js
