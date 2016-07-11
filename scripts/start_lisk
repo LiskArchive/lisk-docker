@@ -51,5 +51,6 @@ populate_database() {
 }
 
 sudo service postgresql start
+sleep 2
 populate_database
 node app.js
