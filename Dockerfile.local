@@ -33,9 +33,10 @@ RUN echo "%lisk ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 
 # Install a preshared ssh key
 # for github public read access via lisk-cli dapps -a
-ADD ./.ssh /home/lisk/.ssh
-RUN chown -R lisk:lisk /home/lisk/.ssh
-RUN chmod 600 /home/lisk/.ssh/*
+# Uncomment these lines to add your ssh key to the docker image
+#ADD ./.ssh /home/lisk/.ssh
+#RUN chown -R lisk:lisk /home/lisk/.ssh
+#RUN chmod 600 /home/lisk/.ssh/*
 
 # Configure PostgreSQL
 RUN /etc/init.d/postgresql start && \
