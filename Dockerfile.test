@@ -1,9 +1,9 @@
 FROM ubuntu:trusty
 MAINTAINER LiskHQ
-LABEL description="Lisk Docker Image" version="1.2.0"
+LABEL description="Lisk Docker Image - Testnet" version="1.2.0"
 
 # Install Essentials
-WORKDIR /~
+WORKDIR /root
 RUN apt-get update
 RUN apt-get install -y build-essential curl git gzip nano python wget tar
 
@@ -12,8 +12,8 @@ RUN curl -sL https://deb.nodesource.com/setup_0.12 | bash -
 RUN apt-get install -y nodejs
 
 # Install PostgreSQL
-ADD scripts/setup_postgresql.Linux /~
-RUN bash setup_postgresql.Linux
+ADD scripts/setup_postgresql.Linux ./
+RUN bash ./setup_postgresql.Linux
 
 # Add Lisk User
 RUN useradd lisk -s /bin/bash -m
@@ -51,5 +51,6 @@ USER lisk
 ENV TOP=true
 ENV TERM=xterm
 
+WORKDIR /home/lisk/lisk
 EXPOSE 7000
 ENTRYPOINT ./start_lisk test

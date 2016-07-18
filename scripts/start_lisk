@@ -2,8 +2,8 @@
 
 NETWORK="$1"
 
-if [ "$NETWORK" != "test" ] && [ "$NETWORK" != "main" ]; then
-  echo "X Invalid first argument (must be test or main)."
+if [ "$NETWORK" != "local" ] && [ "$NETWORK" != "test" && [ "$NETWORK" != "main" ]; then
+  echo "X Invalid first argument (must be local, test or main)."
   exit 1
 else
   DB_NAME="lisk_$NETWORK"
@@ -39,6 +39,10 @@ restore_blockchain() {
 }
 
 populate_database() {
+  if [ "${NETWORK}" == "local" ]; then
+      return
+  fi
+
   psql -ltAq | grep -q "^$DB_NAME|" &> /dev/null
   if [ $? == 0 ]; then
     download_blockchain
@@ -47,5 +51,6 @@ populate_database() {
 }
 
 sudo service postgresql start
+sleep 2
 populate_database
 node app.js
