@@ -1,6 +1,6 @@
 FROM ubuntu:trusty
 MAINTAINER LiskHQ
-LABEL description="Lisk Docker Image - Testnet" version="1.3.0"
+LABEL description="Lisk Docker Image - Testnet" version="1.3.1"
 
 # Install Essentials
 WORKDIR /root
