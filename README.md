@@ -1,6 +1,6 @@
 # Lisk Docker
 
-**The official Lisk docker image.** This document details how to build your own version of the image. If all you want to do is install the official Lisk docker image, please read the following: https://lisk.io/documentation?i=lisk-docs/DockerInstall
+**The official Lisk docker image.** This document details how to build your own version of the image. If all you want to do is install the official Lisk docker image, please read the following: https://github.com/LiskHQ/lisk-wiki/wiki/Docker-Install
 
 ***
 
@@ -57,7 +57,7 @@ docker push username/lisk
 docker run -d --restart=always -p 0.0.0.0:7000:7000 username/lisk
 ```
 
-For more details please read: https://lisk.io/documentation?i=lisk-docs/DockerInstall
+For more details please read: https://github.com/LiskHQ/lisk-wiki/wiki/Docker-Install
 
 #### 7. Archive the image
 
