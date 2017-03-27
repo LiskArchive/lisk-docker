@@ -2,7 +2,7 @@
 
 NETWORK="$1"
 
-if [ "$NETWORK" != "local" ] && [ "$NETWORK" != "test" && [ "$NETWORK" != "main" ]; then
+if [ "$NETWORK" != "local" ] && [ "$NETWORK" != "test" ] && [ "$NETWORK" != "main" ]; then
   echo "X Invalid first argument (must be local, test or main)."
   exit 1
 else
