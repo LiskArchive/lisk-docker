@@ -37,6 +37,7 @@ RUN mv -f lisk-source lisk
 RUN rm lisk-source.tar.gz
 WORKDIR lisk
 RUN npm install --production
+RUN sed -i 's/"public": false,/"public": true,/g' config.json
 
 # Install Lisk Node
 RUN wget https://downloads.lisk.io/lisk-node/lisk-node-Linux-x86_64.tar.gz -O lisk-node-Linux-x86_64.tar.gz
