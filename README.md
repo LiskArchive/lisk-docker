@@ -70,6 +70,43 @@ gzip -9 lisk-docker.tar.gz
 
 ***
 
+#### 9. Using an external postgresql database
+
+Passing the following environment variables to the container using `-e VARX=VALX` will allow you to connect to an external postgresql server or container:
+
+- DATABASE_HOST
+- DATABASE_PORT
+- DATABASE_NAME
+- DATABASE_USER
+- DATABASE_PASSWORD
+
+#### 9. Using Docker Compose
+
+Example:
+
+```
+version: '3'
+services:
+  lisk-node:
+    restart: always
+    image: lisk/mainnet:latest
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_HOST=postgresql
+      - DATABASE_NAME=lisk_main
+      - DATABASE_USER=lisk_main
+      - DATABASE_PASSWORD=password
+    links:
+      - PostgreSQL:postgresql
+  PostgreSQL:
+    restart: always
+    image: postgres:9.6.3
+    environment:
+      - POSTGRES_USER=lisk_main
+      - POSTGRES_PASSWORD=password
+```
+
 ## Useful Commands
 
 #### Removing dangling images

@@ -26,8 +26,16 @@ download_blockchain() {
 
 restore_blockchain() {
   echo "Restoring blockchain..."
-  if [ -f blockchain.db ]; then
-    psql -qd "$DB_NAME" < blockchain.db &> /dev/null
+  if [ "$DATABASE_HOST" == "localhost" ]
+  then
+    if [ -f blockchain.db ]; then
+      psql -qd "$DB_NAME" < blockchain.db &> /dev/null
+    fi
+  else
+    if [ -f blockchain.db ]; then
+      psql -h "$DATABASE_HOST" -U "$DATABASE_USER" -d "$DATABASE_NAME" -w -qd "$DB_NAME" < blockchain.db &> /dev/null
+      rm $PGPASSFILE
+    fi
   fi
   rm -f blockchain.*
   if [ $? != 0 ]; then
@@ -43,14 +51,47 @@ populate_database() {
       return
   fi
 
-  psql -ltAq | grep -q "^$DB_NAME|" &> /dev/null
-  if [ $? == 0 ]; then
-    download_blockchain
-    restore_blockchain
+  if [ "$DATABASE_HOST" == "localhost" ]
+  then
+    psql -ltAq | grep -q "^$DB_NAME|" &> /dev/null
+    echo $?
+    if [ $? == 0 ]; then
+      download_blockchain
+      restore_blockchain
+    fi
+  else
+    psql -h "$DATABASE_HOST" -U "$DATABASE_USER" -d "$DATABASE_NAME" -w -ltAq | grep -q "^$DB_NAME|" &> /dev/null
+    if [ $? == 0 ]; then
+      download_blockchain
+      restore_blockchain
+    fi
   fi
 }
 
-sudo service postgresql start
-sleep 2
-populate_database
-node app.js
+if [ "${DATABASE_HOST:=localhost}" == "localhost" ]
+then
+  echo "Connecting to local database"
+  sudo service postgresql start
+  sleep 2
+  populate_database
+  node app.js
+else
+  jq -c ".db.host = \"${DATABASE_HOST:=localhost}\"" config.json > tmp.$$.json && mv tmp.$$.json config.json
+  jq -c ".db.port = ${DATABASE_PORT:=5432}" config.json > tmp.$$.json && mv tmp.$$.json config.json
+  jq -c ".db.database = \"${DATABASE_NAME:=$DB_NAME}\"" config.json > tmp.$$.json && mv tmp.$$.json config.json
+  jq -c ".db.user = \"${DATABASE_USER}\"" config.json > tmp.$$.json && mv tmp.$$.json config.json
+  jq -c ".db.password = \"${DATABASE_PASSWORD:=password}\"" config.json > tmp.$$.json && mv tmp.$$.json config.json
+  echo "Connecting to remote database"
+  touch ./.pgpass
+  PGPASSFILE="./.pgpass"
+  echo "$DATABASE_HOST:$DATABASE_PORT:$DATABASE_NAME:${DATABASE_USER}:$DATABASE_PASSWORD" > $PGPASSFILE
+  sudo chmod 600 $PGPASSFILE
+  export PGPASSFILE
+  until psql -h "$DATABASE_HOST" -U "$DATABASE_USER" -d "$DATABASE_NAME" -w -c '\l'; do
+    echo "Postgres is unavailable - sleeping"
+    sleep 1
+  done
+  echo "Postgres is up - executing command"
+  populate_database
+  node app.js
+fi

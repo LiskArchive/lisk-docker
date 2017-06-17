@@ -1,0 +1,20 @@
+version: '3'
+services:
+  lisk-node:
+    restart: always
+    image: lisk/mainnet:latest
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_HOST=postgresql
+      - DATABASE_NAME=lisk_main
+      - DATABASE_USER=lisk_main
+      - DATABASE_PASSWORD=password
+    links:
+      - PostgreSQL:postgresql
+  PostgreSQL:
+    restart: always
+    image: postgres:9.6.3
+    environment:
+      - POSTGRES_USER=lisk_main
+      - POSTGRES_PASSWORD=password
