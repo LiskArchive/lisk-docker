@@ -128,6 +128,7 @@ docker rm $(docker ps -q -f status=exited)
 - Oliver Beddows <oliver@lightcurve.io>
 - Michael Schmoock <michael@schmoock.net>
 - Isabella Dell <isabella@lightcurve.io>
+- Ruben Callewaert <rubencallewaertdev@gmail.com>
 
 ## License
 
