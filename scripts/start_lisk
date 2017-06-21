@@ -35,7 +35,7 @@ restore_blockchain() {
   else
     if [ -f blockchain.db ]; then
       psql -h "$DATABASE_HOST" -U "$DATABASE_USER" -d "$DATABASE_NAME" -w < blockchain.db &> /dev/null
-      psql -h "$DATABASE_HOST" -U "$DATABASE_USER" -d "$DATABASE_NAME" -w -c "CREATE DATABASE ${DATABASE_NAME}_check;"
+      psql -h "$DATABASE_HOST" -U "$DATABASE_USER" -d "$DATABASE_NAME" -w -c "CREATE DATABASE ${DATABASE_NAME}_check;" &> /dev/null
       rm $PGPASSFILE
     fi
   fi
@@ -75,14 +75,20 @@ populate_database() {
   fi
 }
 
+jq -c ".consoleLogLevel = \"${LOG_LEVEL:=debug}\"" config.json > tmp.$$.json && mv tmp.$$.json config.json
+
 if [ "${DATABASE_HOST:=localhost}" == "localhost" ]
 then
+  echo "Running with config:"
+  cat config.json
   echo "Connecting to local database"
   DATABASE_NAME=$DB_NAME
   export DATABASE_NAME
   sudo service postgresql start
   sleep 2
+  echo "Postgres is up - executing command"
   populate_database
+  echo "Starting node"
   node app.js
 else
   jq -c ".db.host = \"${DATABASE_HOST:=localhost}\"" config.json > tmp.$$.json && mv tmp.$$.json config.json
@@ -90,6 +96,8 @@ else
   jq -c ".db.database = \"${DATABASE_NAME:=$DB_NAME}\"" config.json > tmp.$$.json && mv tmp.$$.json config.json
   jq -c ".db.user = \"${DATABASE_USER}\"" config.json > tmp.$$.json && mv tmp.$$.json config.json
   jq -c ".db.password = \"${DATABASE_PASSWORD:=password}\"" config.json > tmp.$$.json && mv tmp.$$.json config.json
+  echo "Running with config:"
+  cat config.json
   echo "Connecting to remote database"
   touch ./.pgpass
   PGPASSFILE="./.pgpass"
@@ -102,5 +110,6 @@ else
   done
   echo "Postgres is up - executing command"
   populate_database
+  echo "Starting node"
   node app.js
 fi

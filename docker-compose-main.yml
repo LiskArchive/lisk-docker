@@ -10,6 +10,7 @@ services:
       - DATABASE_NAME=lisk_main
       - DATABASE_USER=lisk_main
       - DATABASE_PASSWORD=password
+      - LOG_LEVEL=info
     links:
       - PostgreSQL:postgresql
   PostgreSQL:
