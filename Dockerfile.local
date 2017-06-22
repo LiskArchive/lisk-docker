@@ -5,7 +5,7 @@ LABEL description="Lisk Docker Image - Local Testnet" version="1.3.4"
 # Install Essentials
 WORKDIR /root
 RUN apt-get update
-RUN apt-get install -y autoconf automake build-essential curl git gzip libtool nano python wget tar
+RUN apt-get install -y autoconf automake build-essential curl git gzip libtool nano python wget tar jq
 
 # Install Node.js and tools
 RUN curl -sL https://deb.nodesource.com/setup_6.x | bash -
@@ -41,7 +41,7 @@ RUN echo "%lisk ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 #RUN chmod 600 /home/lisk/.ssh/*
 
 # Configure PostgreSQL
-RUN /etc/init.d/postgresql start && \
+RUN service postgresql start && \
     sudo -u postgres createuser --createdb lisk && \
     sudo -u postgres psql -c "ALTER USER \"lisk\" WITH PASSWORD 'password';" && \
     sudo -u postgres createdb -O lisk lisk_local
@@ -73,6 +73,9 @@ USER root
 ADD scripts/start_lisk /home/lisk/lisk
 RUN chown lisk:lisk start_lisk
 RUN chmod ug+x start_lisk
+
+# Stop PostgreSQL
+RUN service postgresql stop
 USER lisk
 
 # Build the user-interface
