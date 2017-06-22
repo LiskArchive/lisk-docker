@@ -21,3 +21,5 @@ services:
     environment:
       - POSTGRES_USER=lisk_main
       - POSTGRES_PASSWORD=password
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
