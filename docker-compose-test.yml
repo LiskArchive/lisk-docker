@@ -13,6 +13,8 @@ services:
       - LOG_LEVEL=info
     links:
       - PostgreSQL:postgresql
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
   PostgreSQL:
     restart: always
     image: postgres:9.6.3

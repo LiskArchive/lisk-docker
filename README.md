@@ -80,7 +80,7 @@ Passing the following environment variables to the container using `-e VARX=VALX
 - DATABASE_USER
 - DATABASE_PASSWORD
 
-#### 9. Using Docker Compose
+#### 10. Using Docker Compose
 
 Example:
 
