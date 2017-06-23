@@ -70,7 +70,40 @@ gzip -9 lisk-docker.tar.gz
 
 ***
 
-#### 9. Using an external postgresql database
+## Using Docker Compose 
+
+#### 1. Starting a container with Docker Compose
+
+In order to start a Lisk-Docker installation, the following command should be run depending on the network:
+
+** Mainnet **
+```
+wget https://raw.githubusercontent.com/LiskHQ/lisk-docker/development/docker-compose-main.yml
+docker-compose -f docker-compose-main.yml up -d
+```
+
+** Testnet **
+
+```
+wget https://raw.githubusercontent.com/LiskHQ/lisk-docker/development/docker-compose-test.yml
+docker-compose -f docker-compose-test.yml up -d
+```
+
+#### 2. Stopping a container with Docker Compose
+
+** Mainnet **
+```
+docker-compose -f docker-compose-main.yml down
+```
+
+** Testnet **
+
+```
+docker-compose -f docker-compose-test.yml down
+```
+
+
+#### 3. Using an external postgresql database
 
 Passing the following environment variables to the container using `-e VARX=VALX` will allow you to connect to an external postgresql server or container:
 
@@ -80,7 +113,7 @@ Passing the following environment variables to the container using `-e VARX=VALX
 - DATABASE_USER
 - DATABASE_PASSWORD
 
-#### 10. Using Docker Compose
+#### 4. Docker Compose File Usage
 
 Example:
 
