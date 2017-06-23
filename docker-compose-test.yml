@@ -13,9 +13,13 @@ services:
       - LOG_LEVEL=info
     links:
       - PostgreSQL:postgresql
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
   PostgreSQL:
     restart: always
     image: postgres:9.6.3
     environment:
       - POSTGRES_USER=lisk_test
       - POSTGRES_PASSWORD=password
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
