@@ -70,6 +70,76 @@ gzip -9 lisk-docker.tar.gz
 
 ***
 
+## Using Docker Compose 
+
+#### 1. Starting a container with Docker Compose
+
+In order to start a Lisk-Docker installation, the following command should be run depending on the network:
+
+** Mainnet **
+```
+wget https://raw.githubusercontent.com/LiskHQ/lisk-docker/development/docker-compose-main.yml
+docker-compose -f docker-compose-main.yml up -d
+```
+
+** Testnet **
+
+```
+wget https://raw.githubusercontent.com/LiskHQ/lisk-docker/development/docker-compose-test.yml
+docker-compose -f docker-compose-test.yml up -d
+```
+
+#### 2. Stopping a container with Docker Compose
+
+** Mainnet **
+```
+docker-compose -f docker-compose-main.yml down
+```
+
+** Testnet **
+
+```
+docker-compose -f docker-compose-test.yml down
+```
+
+
+#### 3. Using an external postgresql database
+
+Passing the following environment variables to the container using `-e VARX=VALX` will allow you to connect to an external postgresql server or container:
+
+- DATABASE_HOST
+- DATABASE_PORT
+- DATABASE_NAME
+- DATABASE_USER
+- DATABASE_PASSWORD
+
+#### 4. Docker Compose File Usage
+
+Example:
+
+```
+version: '3'
+services:
+  lisk-node:
+    restart: always
+    image: lisk/mainnet:latest
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_HOST=postgresql
+      - DATABASE_NAME=lisk_main
+      - DATABASE_USER=lisk_main
+      - DATABASE_PASSWORD=password
+    links:
+      - PostgreSQL:postgresql
+  PostgreSQL:
+    restart: always
+    image: postgres:9.6.3
+    environment:
+      - POSTGRES_USER=lisk_main
+      - POSTGRES_PASSWORD=password
+```
+
 ## Useful Commands
 
 #### Removing dangling images
@@ -91,6 +161,7 @@ docker rm $(docker ps -q -f status=exited)
 - Oliver Beddows <oliver@lightcurve.io>
 - Michael Schmoock <michael@schmoock.net>
 - Isabella Dell <isabella@lightcurve.io>
+- Ruben Callewaert <rubencallewaertdev@gmail.com>
 
 ## License
 

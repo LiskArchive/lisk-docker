@@ -1,0 +1,25 @@
+version: '3'
+services:
+  lisk-node:
+    restart: always
+    image: lisk-docker:latest
+    ports:
+      - "4000:4000"
+    environment:
+      - DATABASE_HOST=postgresql
+      - DATABASE_NAME=lisk_local
+      - DATABASE_USER=lisk_local
+      - DATABASE_PASSWORD=password
+      - LOG_LEVEL=info
+    links:
+      - PostgreSQL:postgresql
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+  PostgreSQL:
+    restart: always
+    image: postgres:9.6.3
+    environment:
+      - POSTGRES_USER=lisk_local
+      - POSTGRES_PASSWORD=password
+    volumes:
+      - /etc/localtime:/etc/localtime:ro

@@ -26,8 +26,18 @@ download_blockchain() {
 
 restore_blockchain() {
   echo "Restoring blockchain..."
-  if [ -f blockchain.db ]; then
-    psql -qd "$DB_NAME" < blockchain.db &> /dev/null
+  if [ "$DATABASE_HOST" == "localhost" ]
+  then
+    if [ -f blockchain.db ]; then
+      psql -qd "$DATABASE_NAME" < blockchain.db &> /dev/null
+      psql -qd "$DATABASE_NAME" -c "CREATE DATABASE ${DATABASE_NAME}_check;" &> /dev/null
+    fi
+  else
+    if [ -f blockchain.db ]; then
+      psql -h "$DATABASE_HOST" -U "$DATABASE_USER" -d "$DATABASE_NAME" -w < blockchain.db &> /dev/null
+      psql -h "$DATABASE_HOST" -U "$DATABASE_USER" -d "$DATABASE_NAME" -w -c "CREATE DATABASE ${DATABASE_NAME}_check;" &> /dev/null
+      rm $PGPASSFILE
+    fi
   fi
   rm -f blockchain.*
   if [ $? != 0 ]; then
@@ -43,14 +53,63 @@ populate_database() {
       return
   fi
 
-  psql -ltAq | grep -q "^$DB_NAME|" &> /dev/null
-  if [ $? == 0 ]; then
-    download_blockchain
-    restore_blockchain
+  if [ "$DATABASE_HOST" == "localhost" ]
+  then
+    echo "Looking for database ${DATABASE_NAME}_check"
+    psql -ltAq | grep "^${DATABASE_NAME}_check|"
+    if [ $? == 1 ]; then
+      download_blockchain
+      restore_blockchain
+      else
+      echo "Found database ${DATABASE_NAME}_check"
+    fi
+  else
+    echo "Looking for database ${DATABASE_NAME}_check"
+    psql -h "$DATABASE_HOST" -U "$DATABASE_USER" -d "$DATABASE_NAME" -w -ltAq | grep "^${DATABASE_NAME}_check|"
+    if [ $? == 1 ]; then
+      download_blockchain
+      restore_blockchain
+      else
+      echo "Found database ${DATABASE_NAME}_check"
+    fi
   fi
 }
 
-sudo service postgresql start
-sleep 2
-populate_database
-node app.js
+jq -c ".consoleLogLevel = \"${LOG_LEVEL:=debug}\"" config.json > tmp.$$.json && mv tmp.$$.json config.json
+
+if [ "${DATABASE_HOST:=localhost}" == "localhost" ]
+then
+  echo "Running with config:"
+  cat config.json
+  echo "Connecting to local database"
+  DATABASE_NAME=$DB_NAME
+  export DATABASE_NAME
+  sudo service postgresql start
+  sleep 2
+  echo "Postgres is up - executing command"
+  populate_database
+  echo "Starting node"
+  node app.js
+else
+  jq -c ".db.host = \"${DATABASE_HOST:=localhost}\"" config.json > tmp.$$.json && mv tmp.$$.json config.json
+  jq -c ".db.port = ${DATABASE_PORT:=5432}" config.json > tmp.$$.json && mv tmp.$$.json config.json
+  jq -c ".db.database = \"${DATABASE_NAME:=$DB_NAME}\"" config.json > tmp.$$.json && mv tmp.$$.json config.json
+  jq -c ".db.user = \"${DATABASE_USER}\"" config.json > tmp.$$.json && mv tmp.$$.json config.json
+  jq -c ".db.password = \"${DATABASE_PASSWORD:=password}\"" config.json > tmp.$$.json && mv tmp.$$.json config.json
+  echo "Running with config:"
+  cat config.json
+  echo "Connecting to remote database"
+  touch ./.pgpass
+  PGPASSFILE="./.pgpass"
+  echo "$DATABASE_HOST:$DATABASE_PORT:$DATABASE_NAME:${DATABASE_USER}:$DATABASE_PASSWORD" > $PGPASSFILE
+  sudo chmod 600 $PGPASSFILE
+  export PGPASSFILE
+  until psql -h "$DATABASE_HOST" -U "$DATABASE_USER" -d "$DATABASE_NAME" -w -c '\l'; do
+    echo "Postgres is unavailable - sleeping"
+    sleep 1
+  done
+  echo "Postgres is up - executing command"
+  populate_database
+  echo "Starting node"
+  node app.js
+fi
