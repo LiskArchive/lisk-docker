@@ -104,11 +104,12 @@ else
   echo "$DATABASE_HOST:$DATABASE_PORT:$DATABASE_NAME:${DATABASE_USER}:$DATABASE_PASSWORD" > $PGPASSFILE
   sudo chmod 600 $PGPASSFILE
   export PGPASSFILE
-  until psql -h "$DATABASE_HOST" -U "$DATABASE_USER" -d "$DATABASE_NAME" -w -c '\l'; do
+  until psql -h "$DATABASE_HOST" -U "$DATABASE_USER" -d "$DATABASE_USER" -w -c '\l' &> /dev/null; do
     echo "Postgres is unavailable - sleeping"
     sleep 1
   done
   echo "Postgres is up - executing command"
+  psql -h "$DATABASE_HOST" -U "$DATABASE_USER" -d "$DATABASE_USER" -w -c "CREATE DATABASE ${DATABASE_NAME};" &> /dev/null
   populate_database
   echo "Starting node"
   node app.js
