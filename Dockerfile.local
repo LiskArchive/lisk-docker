@@ -1,6 +1,6 @@
 FROM ubuntu:xenial
 MAINTAINER LiskHQ
-LABEL description="Lisk Docker Image - Local Testnet" version="1.4.0"
+LABEL description="Lisk Docker Image - Local Testnet" version="1.4.1"
 
 # Install Essentials
 WORKDIR /root
