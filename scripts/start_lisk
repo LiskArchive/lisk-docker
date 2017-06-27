@@ -76,6 +76,10 @@ populate_database() {
 }
 
 jq -c ".consoleLogLevel = \"${LOG_LEVEL:=debug}\"" config.json > tmp.$$.json && mv tmp.$$.json config.json
+if [ "${WHITELIST_IP:=127.0.0.1}" != "127.0.0.1" ]
+then
+  jq -c ".forging.access.whiteList = [\"127.0.0.1\",\"${WHITELIST_IP:=debug}\"]" config.json > tmp.$$.json && mv tmp.$$.json config.json
+fi
 
 if [ "${DATABASE_HOST:=localhost}" == "localhost" ]
 then
