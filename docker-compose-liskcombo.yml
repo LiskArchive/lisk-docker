@@ -1,0 +1,40 @@
+version: '3'
+services:
+  lisk-test:
+    restart: always
+    image: lisk/testnet:latest
+    ports:
+      - "7000:7000"
+    environment:
+      - DATABASE_HOST=postgresql
+      - DATABASE_NAME=lisk_test
+      - DATABASE_USER=lisk
+      - DATABASE_PASSWORD=password
+      - LOG_LEVEL=info
+    links:
+      - PostgreSQL:postgresql
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+  lisk-main:
+    restart: always
+    image: lisk/mainnet:latest
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_HOST=postgresql
+      - DATABASE_NAME=lisk_main
+      - DATABASE_USER=lisk
+      - DATABASE_PASSWORD=password
+      - LOG_LEVEL=info
+    links:
+      - PostgreSQL:postgresql
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+  PostgreSQL:
+    restart: always
+    image: postgres:9.6.3
+    environment:
+      - POSTGRES_USER=lisk
+      - POSTGRES_PASSWORD=password
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
