@@ -78,28 +78,28 @@ In order to start a Lisk-Docker installation, the following command should be ru
 
 ** Mainnet **
 ```
-wget https://raw.githubusercontent.com/LiskHQ/lisk-docker/development/docker-compose-main.yml
-docker-compose -f docker-compose-main.yml up -d
+wget https://raw.githubusercontent.com/LiskHQ/lisk-docker/development/docker-compose-liskmain.yml
+docker-compose -f docker-compose-liskmain.yml up -d
 ```
 
 ** Testnet **
 
 ```
-wget https://raw.githubusercontent.com/LiskHQ/lisk-docker/development/docker-compose-test.yml
-docker-compose -f docker-compose-test.yml up -d
+wget https://raw.githubusercontent.com/LiskHQ/lisk-docker/development/docker-compose-lisktest.yml
+docker-compose -f docker-compose-lisktest.yml up -d
 ```
 
 #### 2. Stopping a container with Docker Compose
 
 ** Mainnet **
 ```
-docker-compose -f docker-compose-main.yml down
+docker-compose -f docker-compose-liskmain.yml down
 ```
 
 ** Testnet **
 
 ```
-docker-compose -f docker-compose-test.yml down
+docker-compose -f docker-compose-lisktest.yml down
 ```
 
 
