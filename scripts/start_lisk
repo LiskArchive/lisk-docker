@@ -53,22 +53,22 @@ populate_database() {
 
   if [ "$DATABASE_HOST" == "localhost" ]
   then
-    echo "Looking for peers table"
-    psql -qd "$DATABASE_NAME" -c "select count(*) from peers;" &> /dev/null
+    echo "Looking for blocks table"
+    psql -qd "$DATABASE_NAME" -c "select count(*) from blocks;" &> /dev/null
     if [ $? == 1 ]; then
       download_blockchain
       restore_blockchain
       else
-      echo "Found peers table"
+      echo "Found blocks table"
     fi
   else
-    echo "Looking for peers table"
-    psql -h "$DATABASE_HOST" -U "$DATABASE_USER" -d "$DATABASE_NAME" -w -c "select count(*) from peers;" &> /dev/null
+    echo "Looking for blocks table"
+    psql -h "$DATABASE_HOST" -U "$DATABASE_USER" -d "$DATABASE_NAME" -w -c "select count(*) from blocks;" &> /dev/null
     if [ $? == 1 ]; then
       download_blockchain
       restore_blockchain
       else
-      echo "Found peers table"
+      echo "Found blocks table"
     fi
   fi
 }
