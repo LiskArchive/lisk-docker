@@ -1,41 +1,27 @@
-FROM ubuntu:xenial
+FROM node:6
 MAINTAINER LiskHQ
 LABEL description="Lisk Docker Image - Mainnet" version="1.4.2"
 
 # Install Essentials
 WORKDIR /root
 RUN apt-get update
-RUN apt-get install -y autoconf automake build-essential curl git gzip libtool nano python wget tar jq sudo
-
-# Install Node.js
-RUN curl -sL https://deb.nodesource.com/setup_6.x | bash -
-RUN apt-get install -y nodejs
-RUN npm install -g n
-RUN n 6.11.1
-
-# Install PostgreSQL
-ADD scripts/setup_postgresql.Linux ./
-RUN bash ./setup_postgresql.Linux
+RUN apt-get install -y curl git gzip libtool wget tar sudo nano jq postgresql-client-9.4
 
 # Add Lisk User
 RUN useradd lisk -s /bin/bash -m
 RUN echo "lisk:password" | chpasswd
 RUN echo "%lisk ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 
-# Configure PostgreSQL
-RUN service postgresql start && \
-    sudo -u postgres createuser --createdb lisk && \
-    sudo -u postgres psql -c "ALTER USER \"lisk\" WITH PASSWORD 'password';" && \
-    sudo -u postgres createdb -O lisk lisk_main
+VOLUME ["/home/lisk/lisk"]
 
 # Install Lisk
 USER lisk
 WORKDIR /home/lisk
 RUN wget https://downloads.lisk.io/lisk/main/lisk-source.tar.gz -O lisk-source.tar.gz
 RUN tar -zxvf lisk-source.tar.gz
-RUN mv -f lisk-source lisk
+RUN mv -f lisk-source src
 RUN rm lisk-source.tar.gz
-WORKDIR lisk
+WORKDIR src
 RUN npm install --production
 RUN sed -i 's/"public": false,/"public": true,/g' config.json
 
@@ -45,18 +31,16 @@ RUN tar -zxvf lisk-node-Linux-x86_64.tar.gz
 RUN rm lisk-node-Linux-x86_64.tar.gz
 
 # Install Start Lisk
+WORKDIR /home/lisk
 USER root
-ADD scripts/start_lisk /home/lisk/lisk
+ADD scripts/start_lisk /home/lisk
 RUN chown lisk:lisk start_lisk
 RUN chmod ug+x start_lisk
 
-# Stop PostgreSQL
-RUN service postgresql stop
 USER lisk
 
 ENV TOP=true
 ENV TERM=xterm
 
-WORKDIR /home/lisk/lisk
 EXPOSE 8000
 ENTRYPOINT ./start_lisk main
