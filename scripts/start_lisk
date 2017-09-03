@@ -135,6 +135,7 @@ elif ! diff -q <(jq '.version' ./lisk/config.json) <(jq '.version' ./src/config.
   cd ./lisk
 else
   echo "Nothing changed, starting app..."
+  cd ./lisk
 fi
 
 start
