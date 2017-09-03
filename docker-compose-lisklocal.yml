@@ -8,7 +8,7 @@ services:
     environment:
       - DATABASE_HOST=postgresql
       - DATABASE_NAME=lisk_local
-      - DATABASE_USER=lisk_local
+      - DATABASE_USER=lisk
       - DATABASE_PASSWORD=password
       - LOG_LEVEL=info
     links:
@@ -19,7 +19,7 @@ services:
     restart: always
     image: postgres:9.6.3
     environment:
-      - POSTGRES_USER=lisk_local
+      - POSTGRES_USER=lisk
       - POSTGRES_PASSWORD=password
     volumes:
       - /etc/localtime:/etc/localtime:ro

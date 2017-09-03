@@ -1,4 +1,4 @@
-FROM ubuntu:xenial
+FROM node:6
 MAINTAINER LiskHQ
 LABEL description="Lisk Docker Image - Local Testnet" version="1.4.2"
 
@@ -8,10 +8,6 @@ RUN apt-get update
 RUN apt-get install -y autoconf automake build-essential curl git gzip libtool nano python wget tar jq sudo
 
 # Install Node.js and tools
-RUN curl -sL https://deb.nodesource.com/setup_6.x | bash -
-RUN apt-get install -y nodejs
-RUN npm install -g n
-RUN n 6.11.1
 RUN npm install -g bower
 RUN npm install -g grunt
 
@@ -24,10 +20,6 @@ RUN cp ./out/Release/node /tmp/lisk-node
 WORKDIR ../
 RUN sudo rm -rf lisk-node
 
-# Install PostgreSQL
-ADD scripts/setup_postgresql.Linux ./
-RUN bash ./setup_postgresql.Linux
-
 # Add Lisk User
 RUN useradd lisk -s /bin/bash -m
 RUN echo "lisk:password" | chpasswd
@@ -39,12 +31,6 @@ RUN echo "%lisk ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 #ADD ./.ssh /home/lisk/.ssh
 #RUN chown -R lisk:lisk /home/lisk/.ssh
 #RUN chmod 600 /home/lisk/.ssh/*
-
-# Configure PostgreSQL
-RUN service postgresql start && \
-    sudo -u postgres createuser --createdb lisk && \
-    sudo -u postgres psql -c "ALTER USER \"lisk\" WITH PASSWORD 'password';" && \
-    sudo -u postgres createdb -O lisk lisk_local
 
 # Install Lisk
 USER lisk
@@ -69,15 +55,17 @@ RUN cp nodejs/node nodejs/node.rel
 RUN cp /tmp/lisk-node ./nodejs/node
 
 # Install Start Lisk
+WORKDIR /home/lisk
 USER root
-ADD scripts/start_lisk /home/lisk/lisk
+ADD scripts/entrypoint.sh /home/lisk
+RUN chown lisk:lisk entrypoint.sh
+RUN chmod ug+x entrypoint.sh
+ADD scripts/start_lisk /home/lisk
 RUN chown lisk:lisk start_lisk
 RUN chmod ug+x start_lisk
+WORKDIR lisk
 
-# Stop PostgreSQL
-RUN service postgresql stop
 USER lisk
-
 # Build the user-interface
 WORKDIR public
 # hint local testing passphrase everywhere
@@ -95,6 +83,6 @@ RUN sudo npm install -g .
 ENV TOP=true
 ENV TERM=xterm
 
-WORKDIR /home/lisk/lisk
+WORKDIR /home/lisk
 EXPOSE 4000
-ENTRYPOINT ./start_lisk local
+ENTRYPOINT ["./entrypoint.sh", "local"]

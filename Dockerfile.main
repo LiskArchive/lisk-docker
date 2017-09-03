@@ -33,6 +33,9 @@ RUN rm lisk-node-Linux-x86_64.tar.gz
 # Install Start Lisk
 WORKDIR /home/lisk
 USER root
+ADD scripts/entrypoint.sh /home/lisk
+RUN chown lisk:lisk entrypoint.sh
+RUN chmod ug+x entrypoint.sh
 ADD scripts/start_lisk /home/lisk
 RUN chown lisk:lisk start_lisk
 RUN chmod ug+x start_lisk
@@ -43,4 +46,4 @@ ENV TOP=true
 ENV TERM=xterm
 
 EXPOSE 8000
-ENTRYPOINT ./start_lisk main
+ENTRYPOINT ["./entrypoint.sh", "main"]
