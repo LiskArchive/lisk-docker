@@ -10,7 +10,7 @@ RUN apt-get install -y curl git gzip libtool nano wget tar jq sudo postgresql-cl
 # Add Lisk User
 RUN useradd lisk -s /bin/bash -m
 RUN echo "lisk:password" | chpasswd
-RUN echo "%lisk ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+#RUN echo "%lisk ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 
 VOLUME ["/home/lisk/lisk"]
 
@@ -33,17 +33,18 @@ RUN rm lisk-node-Linux-x86_64.tar.gz
 # Install Start Lisk
 WORKDIR /home/lisk
 USER root
+ADD scripts/setup.sh /home/lisk
+RUN chown lisk:lisk setup.sh
+RUN chmod ug+x setup.sh
 ADD scripts/entrypoint.sh /home/lisk
 RUN chown lisk:lisk entrypoint.sh
 RUN chmod ug+x entrypoint.sh
-ADD scripts/start_lisk /home/lisk
-RUN chown lisk:lisk start_lisk
-RUN chmod ug+x start_lisk
-
-USER lisk
+ADD scripts/restore.sh /home/lisk
+RUN chown lisk:lisk restore.sh
+RUN chmod ug+x restore.sh
 
 ENV TOP=true
 ENV TERM=xterm
 
 EXPOSE 8000
-ENTRYPOINT ["./entrypoint.sh", "test"]
+ENTRYPOINT ["./setup.sh", "test"]

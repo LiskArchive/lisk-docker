@@ -18,12 +18,12 @@ RUN ./configure
 RUN make
 RUN cp ./out/Release/node /tmp/lisk-node
 WORKDIR ../
-RUN sudo rm -rf lisk-node
+RUN rm -rf lisk-node
 
 # Add Lisk User
 RUN useradd lisk -s /bin/bash -m
 RUN echo "lisk:password" | chpasswd
-RUN echo "%lisk ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+# RUN echo "%lisk ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 
 # Install a preshared ssh key
 # for github public read access via lisk-cli dapps -a
@@ -57,12 +57,15 @@ RUN cp /tmp/lisk-node ./nodejs/node
 # Install Start Lisk
 WORKDIR /home/lisk
 USER root
+ADD scripts/setup.sh /home/lisk
+RUN chown lisk:lisk setup.sh
+RUN chmod ug+x setup.sh
 ADD scripts/entrypoint.sh /home/lisk
 RUN chown lisk:lisk entrypoint.sh
 RUN chmod ug+x entrypoint.sh
-ADD scripts/start_lisk /home/lisk
-RUN chown lisk:lisk start_lisk
-RUN chmod ug+x start_lisk
+ADD scripts/restore.sh /home/lisk
+RUN chown lisk:lisk restore.sh
+RUN chmod ug+x restore.sh
 WORKDIR lisk
 
 USER lisk
@@ -78,11 +81,13 @@ RUN grunt release
 WORKDIR /home/lisk
 RUN git clone https://github.com/LiskHQ/lisk-cli.git
 WORKDIR lisk-cli
-RUN sudo npm install -g .
+
+USER root
+RUN npm install -g .
 
 ENV TOP=true
 ENV TERM=xterm
 
 WORKDIR /home/lisk
 EXPOSE 4000
-ENTRYPOINT ["./entrypoint.sh", "local"]
+ENTRYPOINT ["./setup.sh", "local"]

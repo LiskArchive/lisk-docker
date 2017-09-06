@@ -3,8 +3,6 @@
 NETWORK="$1"
 COMMAND="$2"
 
-sudo chown lisk:lisk ./lisk
-
 if [ ! -f ./lisk/config.json ]; then
   echo "Volume not yet initialized, setting up..."
   /bin/cp -rf ./src/* ./lisk/
@@ -37,31 +35,35 @@ cd /home/lisk
 echo "Connecting to remote database"
 touch ./.pgpass
 PGPASSFILE="/home/lisk/.pgpass"
-echo "$DATABASE_HOST:$DATABASE_PORT:$DATABASE_USER:$DATABASE_USER:$DATABASE_PASSWORD" >> $PGPASSFILE
-echo "$DATABASE_HOST:$DATABASE_PORT:$DATABASE_NAME:$DATABASE_USER:$DATABASE_PASSWORD" >> $PGPASSFILE
-sudo chmod 600 $PGPASSFILE
+echo "$DATABASE_HOST:$DATABASE_PORT:*:$DATABASE_USER:$DATABASE_PASSWORD" > $PGPASSFILE
+chmod 600 $PGPASSFILE
 until psql -h "$DATABASE_HOST" -U "$DATABASE_USER" -d "$DATABASE_USER" -w -c '\l' &> /dev/null; do
   echo "Postgres is unavailable - sleeping"
   sleep 1
 done
 echo "Postgres is up - executing command"
 
+export PGPASSFILE
+export SNAPSHOT_URL
+export DATABASE_HOST
+export DATABASE_NAME
+export DATABASE_USER
+export DATABASE_PASSWORD
+
 if [ -z "$COMMAND" ]
 then
-  export PGPASSFILE
-  export SNAPSHOT_URL
-  export DATABASE_HOST
-  export DATABASE_NAME
-  export DATABASE_USER
-  export DATABASE_PASSWORD
   psql -h "$DATABASE_HOST" -U "$DATABASE_USER" -d "$DATABASE_USER" -w -c "CREATE DATABASE ${DATABASE_NAME};" &> /dev/null
-  exec ./start_lisk $NETWORK
+  cd ./lisk
+  ../restore.sh $NETWORK
+  echo "Starting node"
+  node app.js
 elif [ "$COMMAND" == "reset" ]
 then
   echo "Running reset"
-  psql -h "$DATABASE_HOST" -U "$DATABASE_USER" -d "$DATABASE_USER" -w -c "DROP DATABASE ${DATABASE_NAME};" &> /dev/null
-  psql -h "$DATABASE_HOST" -U "$DATABASE_USER" -d "$DATABASE_USER" -w -c "CREATE DATABASE ${DATABASE_NAME};" &> /dev/null
-  rm $PGPASSFILE
+  dropdb -h "$DATABASE_HOST" -U "$DATABASE_USER" -w lisk_local 
+  psql -h "$DATABASE_HOST" -U "$DATABASE_USER" -d "$DATABASE_USER" -w -c "CREATE DATABASE ${DATABASE_NAME};"
+  cd ./lisk
+  ../restore.sh $NETWORK
 else
   echo "Incorrect command, exiting..."
 fi

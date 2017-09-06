@@ -27,16 +27,9 @@ download_blockchain() {
 
 restore_blockchain() {
   echo "Restoring blockchain..."
-  if [ "$DATABASE_HOST" == "localhost" ]
-  then
-    if [ -f blockchain.db ]; then
-      psql -qd "$DATABASE_NAME" < blockchain.db &> /dev/null
-    fi
-  else
-    if [ -f blockchain.db ]; then
-      psql -h "$DATABASE_HOST" -U "$DATABASE_USER" -d "$DATABASE_NAME" -w < blockchain.db &> /dev/null
-      rm $PGPASSFILE
-    fi
+  if [ -f blockchain.db ]; then
+    psql -h "$DATABASE_HOST" -U "$DATABASE_USER" -d "$DATABASE_NAME" -w < blockchain.db &> /dev/null
+    rm $PGPASSFILE
   fi
   rm -f blockchain.*
   if [ $? != 0 ]; then
@@ -52,33 +45,15 @@ populate_database() {
       return
   fi
 
-  if [ "$DATABASE_HOST" == "localhost" ]
-  then
-    echo "Looking for blocks table"
-    psql -qd "$DATABASE_NAME" -c "select * from blocks limit 1;" &> /dev/null
-    if [ $? == 1 ]; then
-      download_blockchain
-      restore_blockchain
-      else
-      echo "Found blocks table"
-    fi
+  echo "Looking for blocks table"
+  psql -h "$DATABASE_HOST" -U "$DATABASE_USER" -d "$DATABASE_NAME" -w -c "select * from blocks limit 1;" &> /dev/null
+  if [ $? == 1 ]; then
+    download_blockchain
+    restore_blockchain
   else
-    echo "Looking for blocks table"
-    psql -h "$DATABASE_HOST" -U "$DATABASE_USER" -d "$DATABASE_NAME" -w -c "select * from blocks limit 1;" &> /dev/null
-    if [ $? == 1 ]; then
-      download_blockchain
-      restore_blockchain
-      else
-      echo "Found blocks table"
-    fi
+    echo "Found blocks table"
+    rm $PGPASSFILE
   fi
 }
 
-start() {
-  cd ./lisk
-  populate_database
-  echo "Starting node"
-  node app.js
-}
-
-start
+populate_database
