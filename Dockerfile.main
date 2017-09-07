@@ -43,6 +43,8 @@ ADD scripts/restore.sh /home/lisk
 RUN chown lisk:lisk restore.sh
 RUN chmod ug+x restore.sh
 
+RUN npm install --global --production lisky
+
 ENV TOP=true
 ENV TERM=xterm
 

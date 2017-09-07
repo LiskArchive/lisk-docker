@@ -7,19 +7,6 @@ WORKDIR /root
 RUN apt-get update
 RUN apt-get install -y autoconf automake build-essential curl git gzip libtool nano python wget tar jq sudo postgresql-client-9.4
 
-# Install Node.js and tools
-RUN npm install -g bower
-RUN npm install -g grunt
-
-# Build lisk node binary
-RUN git clone https://github.com/LiskHQ/lisk-node.git
-WORKDIR lisk-node
-RUN ./configure
-RUN make
-RUN cp ./out/Release/node /tmp/lisk-node
-WORKDIR ../
-RUN rm -rf lisk-node
-
 # Add Lisk User
 RUN useradd lisk -s /bin/bash -m
 RUN echo "lisk:password" | chpasswd
@@ -65,20 +52,19 @@ RUN chmod ug+x entrypoint.sh
 ADD scripts/restore.sh /home/lisk
 RUN chown lisk:lisk restore.sh
 RUN chmod ug+x restore.sh
-WORKDIR lisk
 
-# Install lisk-cli
 USER lisk
-WORKDIR /home/lisk
-RUN git clone https://github.com/LiskHQ/lisk-cli.git
-WORKDIR lisk-cli
-
+RUN git clone https://github.com/LiskHQ/lisky.git
+WORKDIR lisky
 USER root
-RUN npm install -g .
+RUN npm install --global --production
+WORKDIR /home/lisk
+
+# hint local testing passphrase everywhere
+# wagon stock borrow episode laundry kitten salute link globe zero feed marble
 
 ENV TOP=true
 ENV TERM=xterm
 
-WORKDIR /home/lisk
 EXPOSE 4000
 ENTRYPOINT ["./setup.sh", "local"]
