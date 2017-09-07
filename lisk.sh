@@ -9,30 +9,30 @@
 #%    Lisk Docker Utility Script
 #%
 #% OPTIONS
-#%    start [network]                Start All docker containers for a specific network
-#%                                   default network is main
-#%    stop [network]                 Stop all docker containers for a specific network
-#%                                   default network is main
-#%    uninstall [network]            uninstall all docker containers for a specific network
-#%                                   default network is main
-#%    upgrade [network]              upgrade all docker containers for a specific network
-#%                                   default network is main
-#%    logs [network] [args ...]      get logs for a specific network
-#%                                   default network is main
-#%                                   optional args:
-#%                                   --details (Show extra details provided to logs)
-#%                                   --follow, -f (Follow log output)
-#%                                   --since (logs since timestamp e.g. 2013-01-02T13:23:37 or relative e.g. 42m)
-#%                                   --tail (Number of lines to show from the end of the logs)
-#%                                   --timestamps, -t (Show timestamps)
-#%    reset [network] [url]          Reset the database and start syncing blocks again.
-#%                                   default network is main
-#%                                   Optianal snapshot url, default is from LiskHQ
-#%    ssh [network]                  Log in to the container for a specific network
-#%                                   default network is main
-#%    status                         Prints the status of lisk-docker.
-#%    help                           Print this help
-#%    version                        Print script information
+#%    start [network] [forging ip]    Start All docker containers for a specific network
+#%                                    default network is main
+#%    stop [network]                  Stop all docker containers for a specific network
+#%                                    default network is main
+#%    uninstall [network]             uninstall all docker containers for a specific network
+#%                                    default network is main
+#%    upgrade [network] [forging ip]  upgrade all docker containers for a specific network
+#%                                    default network is main
+#%    logs [network] [args ...]       get logs for a specific network
+#%                                    default network is main
+#%                                    optional args:
+#%                                    --details (Show extra details provided to logs)
+#%                                    --follow, -f (Follow log output)
+#%                                    --since (logs since timestamp e.g. 2013-01-02T13:23:37 or relative e.g. 42m)
+#%                                    --tail (Number of lines to show from the end of the logs)
+#%                                    --timestamps, -t (Show timestamps)
+#%    reset [network] [url]           Reset the database and start syncing blocks again.
+#%                                    default network is main
+#%                                    Optianal snapshot url, default is from LiskHQ
+#%    ssh [network]                   Log in to the container for a specific network
+#%                                    default network is main
+#%    status                          Prints the status of lisk-docker.
+#%    help                            Print this help
+#%    version                         Print script information
 #%
 #% EXAMPLES
 #%    ${SCRIPT_NAME} start main
@@ -57,6 +57,8 @@ usagefull() { head -${SCRIPT_HEADSIZE:-99} ${0} | grep -e "^#[%+-]" | sed -e "s/
 scriptinfo() { head -${SCRIPT_HEADSIZE:-99} ${0} | grep -e "^#-" | sed -e "s/^#-//g" -e "s/\${SCRIPT_NAME}/${SCRIPT_NAME}/g"; }
 
 start() {
+  FORGINGWHITELISTIP=$2
+
   docker network inspect lisk &> /dev/null
   if [ $? != 0 ]; then
     docker network create lisk
@@ -114,6 +116,7 @@ start() {
       -e REDIS_HOST=redis \
       -e REDIS_PORT=6379 \
       -e REDIS_DB=${REDISINSTANCE} \
+      -e FORGING_WHITELIST_IP=${FORGINGWHITELISTIP:=127.0.0.1} \
       -e LOG_LEVEL=info \
       --name ${NAME} \
       --net lisk \
@@ -124,9 +127,11 @@ start() {
 
 stop() {
   if [ "$(docker ps -q -f name=${NAME})" ]; then docker stop ${NAME}; fi
+  docker rm ${NAME}
 }
 
 upgrade() {
+  FORGINGWHITELISTIP=$2
   if [ "$(docker ps -q -f name=${NAME})" ]; then docker stop ${NAME} &> /dev/null; fi
   docker rm ${NAME} &> /dev/null
   if [ "$1" != "local" ]; then docker pull ${IMAGE} &> /dev/null; fi
@@ -140,6 +145,7 @@ upgrade() {
     -e REDIS_HOST=redis \
     -e REDIS_PORT=6379 \
     -e REDIS_DB=${REDISINSTANCE} \
+    -e FORGING_WHITELIST_IP=${FORGINGWHITELISTIP:=127.0.0.1} \
     -e LOG_LEVEL=info \
     --name ${NAME} \
     --net lisk \
@@ -236,7 +242,7 @@ setupnetwork() {
       NAME=localnet
       DB=lisk_local
       IMAGE=lisk-docker:latest
-      PORT=4000
+      PORT=7000
       OTHER1=mainnet
       OTHER2=testnet
       REDISINSTANCE=2
@@ -251,7 +257,7 @@ case "$1" in
   start)
     setupnetwork $@
     echo "starting ${NAME}..."
-    start $NETWORK
+    start $NETWORK $3
     ;;
   stop)
     setupnetwork $@
@@ -266,7 +272,7 @@ case "$1" in
   upgrade)
     setupnetwork $@
     echo "upgrading ${NAME}..."
-    upgrade $NETWORK
+    upgrade $NETWORK $3
     ;;
   logs)
     setupnetwork $@
