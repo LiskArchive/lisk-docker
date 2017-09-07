@@ -3,7 +3,7 @@
 # HEADER
 #================================================================
 #% SYNOPSIS
-#+    ${SCRIPT_NAME} [-hvsprul] args ...
+#+    ${SCRIPT_NAME} [-spdulrhv] args ...
 #%
 #% DESCRIPTION
 #%    Lisk Docker Utility Script
@@ -255,7 +255,7 @@ reset() {
 }
 
 case "$1" in
-  --start)
+  -s|--start)
     echo "starting lisk-docker..."
     INPUT=${2:-main}
     if [[ "$INPUT" == "main" || "$INPUT" == "test" || "$INPUT" == "local" ]]; then
@@ -264,7 +264,7 @@ case "$1" in
       echo "Incorrect network, valid options are: main, test, local"
     fi
     ;;
-  --stop)
+  -p|--stop)
     echo "stopping lisk-docker..."
     INPUT=${2:-main}
     if [[ "$INPUT" == "main" || "$INPUT" == "test" || "$INPUT" == "local" ]]; then
@@ -273,7 +273,7 @@ case "$1" in
       echo "Incorrect network, valid options are: main, test, local"
     fi
     ;;
-  --delete)
+  -d|--delete)
     echo "deleting lisk-docker..."
     INPUT=${2:-main}
     if [[ "$INPUT" == "main" || "$INPUT" == "test" || "$INPUT" == "local" ]]; then
@@ -282,7 +282,7 @@ case "$1" in
       echo "Incorrect network, valid options are: main, test, local"
     fi
     ;;
-  --upgrade)
+  -u|--upgrade)
     echo "upgrading lisk-docker..."
     INPUT=${2:-main}
     if [[ "$INPUT" == "main" || "$INPUT" == "test" ]]; then
@@ -291,7 +291,7 @@ case "$1" in
       echo "Incorrect network, valid options are: main, test"
     fi
     ;;
-  --logs)
+  -l|--logs)
     INPUT=${2:-main}
     shift
     shift
@@ -301,7 +301,7 @@ case "$1" in
       echo "Incorrect network, valid options are: main, test, local"
     fi
     ;;
-  --reset)
+  -r|--reset)
     echo "resetting lisk-docker..."
     INPUT=${2:-main}
     shift
@@ -312,10 +312,7 @@ case "$1" in
       echo "Incorrect network, valid options are: main, test, local"
     fi
     ;;
-  -v)
-    scriptinfo
-    ;;
-  --version)
+  -v|--version)
     scriptinfo
     ;;
   *)
