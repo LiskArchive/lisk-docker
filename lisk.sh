@@ -3,35 +3,37 @@
 # HEADER
 #================================================================
 #% SYNOPSIS
-#+    ${SCRIPT_NAME} [-spdulrhv] args ...
+#+    ${SCRIPT_NAME} [command] args ...
 #%
 #% DESCRIPTION
 #%    Lisk Docker Utility Script
 #%
 #% OPTIONS
-#%    -s [network], --start [network]                 Start All docker containers for a specific network
-#%                                                    default network is main
-#%    -p [network], --stop [network]                  Stop all docker containers for a specific network
-#%                                                    default network is main
-#%    -d [network], --delete [network]                uninstall all docker containers for a specific network
-#%                                                    default network is main
-#%    -u [network], --upgrade [network]               upgrade all docker containers for a specific network
-#%                                                    default network is main
-#%    -l [network], --logs [network] [args ...]       get logs for a specific network
-#%                                                    default network is main
-#%                                                    optional args:
-#%                                                    --details (Show extra details provided to logs)
-#%                                                    --follow, -f (Follow log output)
-#%                                                    --since (logs since timestamp e.g. 2013-01-02T13:23:37 or relative e.g. 42m)
-#%                                                    --tail (Number of lines to show from the end of the logs)
-#%                                                    --timestamps, -t (Show timestamps)
-#%    -r [network] [url], --reset [network] [url]     Reset the database and start syncing blocks again.
-#%                                                    Optianal snapshot url, default is from LiskHQ
-#%    -h, --help                                      Print this help
-#%    -v, --version                                   Print script information
+#%    start [network]                Start All docker containers for a specific network
+#%                                   default network is main
+#%    stop [network]                 Stop all docker containers for a specific network
+#%                                   default network is main
+#%    delete [network]               uninstall all docker containers for a specific network
+#%                                   default network is main
+#%    upgrade [network]              upgrade all docker containers for a specific network
+#%                                   default network is main
+#%    logs [network] [args ...]      get logs for a specific network
+#%                                   default network is main
+#%                                   optional args:
+#%                                   --details (Show extra details provided to logs)
+#%                                   --follow, -f (Follow log output)
+#%                                   --since (logs since timestamp e.g. 2013-01-02T13:23:37 or relative e.g. 42m)
+#%                                   --tail (Number of lines to show from the end of the logs)
+#%                                   --timestamps, -t (Show timestamps)
+#%    reset [network] [url]          Reset the database and start syncing blocks again.
+#%                                   default network is main
+#%                                   Optianal snapshot url, default is from LiskHQ
+#%    status                         Prints the status of lisk-docker.
+#%    help                           Print this help
+#%    version                        Print script information
 #%
 #% EXAMPLES
-#%    ${SCRIPT_NAME} -s main
+#%    ${SCRIPT_NAME} start main
 #%
 #================================================================
 #- IMPLEMENTATION
@@ -56,25 +58,6 @@ start() {
   docker network inspect lisk &> /dev/null
   if [ $? != 0 ]; then
     docker network create lisk
-  fi
-
-  if [ "$1" == "main" ]
-  then
-    NAME=mainnet
-    DB=lisk_main
-    IMAGE=lisk/mainnet:latest
-    PORT=8000
-  elif [ "$1" == "test" ]
-  then
-    NAME=testnet
-    DB=lisk_test
-    IMAGE=lisk/testnet:latest
-    PORT=7000
-  else
-    NAME=localnet
-    DB=lisk_local
-    IMAGE=lisk-docker:latest
-    PORT=4000
   fi
 
   if [ ! "$(docker ps -q -f name=postgresql)" ]; then
@@ -123,33 +106,13 @@ start() {
 }
 
 stop() {
-  if [ "$1" == "main" ]
-  then
-    NAME=mainnet
-  elif [ "$1" == "test" ]
-  then
-    NAME=testnet
-  else
-    NAME=localnet
-  fi
   if [ "$(docker ps -q -f name=${NAME})" ]; then docker stop ${NAME}; fi
 }
 
 upgrade() {
-  if [ "$1" == "main" ]
-  then
-    NAME=mainnet
-    IMAGE=lisk/mainnet:latest
-    PORT=8000
-  elif [ "$1" == "test" ]
-  then
-    NAME=testnet
-    IMAGE=lisk/testnet:latest
-    PORT=7000
-  fi
   if [ "$(docker ps -q -f name=${NAME})" ]; then docker stop ${NAME} &> /dev/null; fi
   docker rm ${NAME} &> /dev/null
-  docker pull ${IMAGE} &> /dev/null
+  if [ "$1" != "local" ]; then docker pull ${IMAGE} &> /dev/null; fi
   docker run -d --restart=always \
     -p ${PORT}:${PORT} \
     -e DATABASE_HOST=postgresql \
@@ -163,21 +126,6 @@ upgrade() {
 }
 
 uninstall() {
-  if [ "$1" == "main" ]
-  then
-    NAME=mainnet
-    OTHER1=testnet
-    OTHER2=localnet
-  elif [ "$1" == "test" ]
-  then
-    NAME=testnet
-    OTHER1=mainnet
-    OTHER2=localnet
-  else
-    NAME=localnet
-    OTHER1=mainnet
-    OTHER2=testnet
-  fi
   if [ "$(docker ps -q -f name=${NAME})" ]; then docker stop ${NAME} &> /dev/null; fi
   docker rm ${NAME} &> /dev/null
 
@@ -197,35 +145,11 @@ uninstall() {
 }
 
 logs() {
-  if [ "$1" == "main" ]
-  then
-    NAME=mainnet
-  elif [ "$1" == "test" ]
-  then
-    NAME=testnet
-  else
-    NAME=localnet
-  fi
   shift
   docker logs $@ ${NAME}
 }
 
 reset() {
-  if [ "$1" == "main" ]
-  then
-    NAME=mainnet
-    DB=lisk_main
-    IMAGE=lisk/mainnet:latest
-  elif [ "$1" == "test" ]
-  then
-    NAME=testnet
-    DB=lisk_test
-    IMAGE=lisk/testnet:latest
-  else
-    NAME=localnet
-    DB=lisk_local
-    IMAGE=lisk-docker:latest
-  fi
   if [ "$(docker ps -q -f name=${NAME})" ]; then docker stop ${NAME} &> /dev/null; fi
   sleep 5
   if [ -z "$2" ]
@@ -254,65 +178,82 @@ reset() {
   docker start ${NAME} &> /dev/null
 }
 
+status() {
+  docker ps
+}
+
+setupnetwork() {
+  NETWORK=${2:-main}
+  if [[ "$NETWORK" == "main" || "$NETWORK" == "test" || "$NETWORK" == "local" ]]; then
+
+    if [ "$NETWORK" == "main" ]
+    then
+      NAME=mainnet
+      DB=lisk_main
+      IMAGE=lisk/mainnet:latest
+      PORT=8000
+      OTHER1=testnet
+      OTHER2=localnet
+    elif [ "$NETWORK" == "test" ]
+    then
+      NAME=testnet
+      DB=lisk_test
+      IMAGE=lisk/testnet:latest
+      PORT=7000
+      OTHER1=mainnet
+      OTHER2=localnet
+    else
+      NAME=localnet
+      DB=lisk_local
+      IMAGE=lisk-docker:latest
+      PORT=4000
+      OTHER1=mainnet
+      OTHER2=testnet
+    fi
+
+  else 
+    echo "Incorrect network, valid options are: main, test, local"
+  fi
+}
+
 case "$1" in
-  -s|--start)
+  start)
     echo "starting lisk-docker..."
-    INPUT=${2:-main}
-    if [[ "$INPUT" == "main" || "$INPUT" == "test" || "$INPUT" == "local" ]]; then
-        start $INPUT
-    else 
-      echo "Incorrect network, valid options are: main, test, local"
-    fi
+    setupnetwork
+    start $NETWORK
     ;;
-  -p|--stop)
+  stop)
     echo "stopping lisk-docker..."
-    INPUT=${2:-main}
-    if [[ "$INPUT" == "main" || "$INPUT" == "test" || "$INPUT" == "local" ]]; then
-        stop $INPUT
-    else 
-      echo "Incorrect network, valid options are: main, test, local"
-    fi
+    setupnetwork
+    stop $NETWORK
     ;;
-  -d|--delete)
+  delete)
     echo "deleting lisk-docker..."
-    INPUT=${2:-main}
-    if [[ "$INPUT" == "main" || "$INPUT" == "test" || "$INPUT" == "local" ]]; then
-        uninstall $INPUT
-    else 
-      echo "Incorrect network, valid options are: main, test, local"
-    fi
+    setupnetwork
+    uninstall $NETWORK
     ;;
-  -u|--upgrade)
+  upgrade)
     echo "upgrading lisk-docker..."
-    INPUT=${2:-main}
-    if [[ "$INPUT" == "main" || "$INPUT" == "test" ]]; then
-        upgrade $INPUT
-    else 
-      echo "Incorrect network, valid options are: main, test"
-    fi
+    setupnetwork
+    upgrade $NETWORK
     ;;
-  -l|--logs)
-    INPUT=${2:-main}
+  logs)
+    setupnetwork
     shift
     shift
-    if [[ "$INPUT" == "main" || "$INPUT" == "test" || "$INPUT" == "local" ]]; then
-        logs $INPUT $@
-    else 
-      echo "Incorrect network, valid options are: main, test, local"
-    fi
+    logs $NETWORK $@
     ;;
-  -r|--reset)
+  reset)
     echo "resetting lisk-docker..."
-    INPUT=${2:-main}
-    shift
-    shift
-    if [[ "$INPUT" == "main" || "$INPUT" == "test" || "$INPUT" == "local" ]]; then
-        reset $INPUT $3
-    else 
-      echo "Incorrect network, valid options are: main, test, local"
-    fi
+    setupnetwork
+    reset $NETWORK $3
     ;;
-  -v|--version)
+  status)
+    echo "status of lisk-docker..."
+    setupnetwork
+    status
+    ;;
+  version)
     scriptinfo
     ;;
   *)
