@@ -242,7 +242,7 @@ setupnetwork() {
       NAME=localnet
       DB=lisk_local
       IMAGE=lisk-docker:latest
-      PORT=7000
+      PORT=4000
       OTHER1=mainnet
       OTHER2=testnet
       REDISINSTANCE=2
