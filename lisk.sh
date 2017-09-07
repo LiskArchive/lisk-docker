@@ -40,7 +40,7 @@
 #================================================================
 #- IMPLEMENTATION
 #-    version         ${SCRIPT_NAME} 0.0.1
-#-    author          Ruben Callewaert
+#-    author          Ruben Callewaert (https://github.com/5an1ty/)
 #-    license         GNU General Public License
 #-
 #================================================================
