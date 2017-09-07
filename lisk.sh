@@ -130,6 +130,7 @@ start() {
 stop() {
   if [ "$(docker ps -q -f name=${NAME})" ]; then docker stop ${NAME}; fi
   docker rm ${NAME}
+  docker volume rm $(docker volume ls -f dangling=true -q) > /dev/null
 }
 
 upgrade() {
@@ -152,6 +153,7 @@ upgrade() {
     --name ${NAME} \
     --net lisk \
     ${IMAGE}
+    docker volume rm $(docker volume ls -f dangling=true -q) > /dev/null
 }
 
 uninstall() {
@@ -174,6 +176,7 @@ uninstall() {
       fi
     fi
   fi
+  docker volume rm $(docker volume ls -f dangling=true -q) > /dev/null
 }
 
 logs() {

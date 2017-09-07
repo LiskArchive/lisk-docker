@@ -6,6 +6,7 @@ LABEL description="Lisk Docker Image - Local Testnet" version="1.4.2"
 WORKDIR /root
 RUN apt-get update
 RUN apt-get install -y autoconf automake build-essential curl git gzip libtool nano python wget tar jq sudo postgresql-client-9.4
+RUN npm install -g babel
 
 # Add Lisk User
 RUN useradd lisk -s /bin/bash -m
@@ -56,6 +57,9 @@ RUN chmod ug+x restore.sh
 USER lisk
 RUN git clone https://github.com/LiskHQ/lisky.git
 WORKDIR lisky
+
+RUN npm install
+RUN npm run build
 USER root
 RUN npm install --global --production
 WORKDIR /home/lisk
