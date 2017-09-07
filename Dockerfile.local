@@ -5,7 +5,7 @@ LABEL description="Lisk Docker Image - Local Testnet" version="1.4.2"
 # Install Essentials
 WORKDIR /root
 RUN apt-get update
-RUN apt-get install -y autoconf automake build-essential curl git gzip libtool nano python wget tar jq sudo
+RUN apt-get install -y autoconf automake build-essential curl git gzip libtool nano python wget tar jq sudo postgresql-client-9.4
 
 # Install Node.js and tools
 RUN npm install -g bower
@@ -23,7 +23,7 @@ RUN rm -rf lisk-node
 # Add Lisk User
 RUN useradd lisk -s /bin/bash -m
 RUN echo "lisk:password" | chpasswd
-# RUN echo "%lisk ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+RUN echo "%lisk ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 
 # Install a preshared ssh key
 # for github public read access via lisk-cli dapps -a
@@ -51,11 +51,10 @@ RUN sed -i 's/"masterpassword": ""/"masterpassword": "local"/g' config.json
 RUN wget https://downloads.lisk.io/lisk-node/lisk-node-Linux-x86_64.tar.gz -O lisk-node-Linux-x86_64.tar.gz
 RUN tar -zxvf lisk-node-Linux-x86_64.tar.gz
 RUN rm lisk-node-Linux-x86_64.tar.gz
-RUN cp nodejs/node nodejs/node.rel
-RUN cp /tmp/lisk-node ./nodejs/node
 
 # Install Start Lisk
 WORKDIR /home/lisk
+RUN cp -r ./lisk ./src
 USER root
 ADD scripts/setup.sh /home/lisk
 RUN chown lisk:lisk setup.sh
@@ -68,16 +67,8 @@ RUN chown lisk:lisk restore.sh
 RUN chmod ug+x restore.sh
 WORKDIR lisk
 
-USER lisk
-# Build the user-interface
-WORKDIR public
-# hint local testing passphrase everywhere
-RUN sed -i "s/Your Passphrase/wagon stock borrow episode laundry kitten salute link globe zero feed marble/g" partials/*.html partials/modals/*.html
-RUN npm install
-RUN bower install
-RUN grunt release
-
 # Install lisk-cli
+USER lisk
 WORKDIR /home/lisk
 RUN git clone https://github.com/LiskHQ/lisk-cli.git
 WORKDIR lisk-cli

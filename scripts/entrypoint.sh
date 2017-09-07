@@ -3,6 +3,13 @@
 NETWORK="$1"
 COMMAND="$2"
 
+if [ "$NETWORK" != "local" ] && [ "$NETWORK" != "test" ] && [ "$NETWORK" != "main" ]; then
+  echo "X Invalid first argument (must be local, test or main)."
+  exit 1
+else
+  DB_NAME="lisk_$NETWORK"
+fi
+
 if [ ! -f ./lisk/config.json ]; then
   echo "Volume not yet initialized, setting up..."
   /bin/cp -rf ./src/* ./lisk/
@@ -23,11 +30,17 @@ then
   jq -c ".forging.access.whiteList = [\"127.0.0.1\",\"$FORGING_WHITELIST_IP\"]" config.json > tmp.$$.json && mv tmp.$$.json config.json
 fi
 
+RESOLVED_REDIS_HOST=$(getent hosts ${REDIS_HOST:=127.0.0.1} | awk '{ print $1 }')
+
 jq -c ".db.host = \"${DATABASE_HOST:=localhost}\"" config.json > tmp.$$.json && mv tmp.$$.json config.json
 jq -c ".db.port = ${DATABASE_PORT:=5432}" config.json > tmp.$$.json && mv tmp.$$.json config.json
 jq -c ".db.database = \"${DATABASE_NAME:=$DB_NAME}\"" config.json > tmp.$$.json && mv tmp.$$.json config.json
 jq -c ".db.user = \"${DATABASE_USER}\"" config.json > tmp.$$.json && mv tmp.$$.json config.json
 jq -c ".db.password = \"${DATABASE_PASSWORD:=password}\"" config.json > tmp.$$.json && mv tmp.$$.json config.json
+jq -c ".redis.host = \"${RESOLVED_REDIS_HOST}\"" config.json > tmp.$$.json && mv tmp.$$.json config.json
+jq -c ".redis.port = ${REDIS_PORT:=6380}" config.json > tmp.$$.json && mv tmp.$$.json config.json
+jq -c ".redis.db = ${REDIS_DB:=0}" config.json > tmp.$$.json && mv tmp.$$.json config.json
+jq -c ".cacheEnabled = ${REDIS_ENABLED:=false}" config.json > tmp.$$.json && mv tmp.$$.json config.json
 echo "Running with config:"
 cat config.json
 cd /home/lisk

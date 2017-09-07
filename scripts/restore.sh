@@ -2,13 +2,6 @@
 
 NETWORK="$1"
 
-if [ "$NETWORK" != "local" ] && [ "$NETWORK" != "test" ] && [ "$NETWORK" != "main" ]; then
-  echo "X Invalid first argument (must be local, test or main)."
-  exit 1
-else
-  DB_NAME="lisk_$NETWORK"
-fi
-
 download_blockchain() {
   echo "Downloading blockchain snapshot..."
   DEFAULT_SNAPSHOT_URL="https://downloads.lisk.io/lisk/$NETWORK/blockchain.db.gz"

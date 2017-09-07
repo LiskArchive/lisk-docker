@@ -28,6 +28,8 @@
 #%    reset [network] [url]          Reset the database and start syncing blocks again.
 #%                                   default network is main
 #%                                   Optianal snapshot url, default is from LiskHQ
+#%    ssh [network]                  Log in to the container for a specific network
+#%                                   default network is main
 #%    status                         Prints the status of lisk-docker.
 #%    help                           Print this help
 #%    version                        Print script information
@@ -87,6 +89,17 @@ start() {
     fi
   fi
 
+  if [ ! "$(docker ps -q -f name=redis)" ]; then
+    if [ "$(docker ps -aq -f status=exited -f name=redis)" ]; then
+      docker start redis
+    else
+      docker run -d --restart=always \
+      --net lisk \
+      --name redis \
+      redis
+    fi
+  fi
+
   if [ ! "$(docker ps -q -f name=${NAME})" ]; then
     if [ "$(docker ps -aq -f status=exited -f name=${NAME})" ]; then
       docker start ${NAME}
@@ -97,6 +110,10 @@ start() {
       -e DATABASE_NAME=${DB} \
       -e DATABASE_USER=lisk \
       -e DATABASE_PASSWORD=password \
+      -e REDIS_ENABLED=true \
+      -e REDIS_HOST=redis \
+      -e REDIS_PORT=6379 \
+      -e REDIS_DB=${REDISINSTANCE} \
       -e LOG_LEVEL=info \
       --name ${NAME} \
       --net lisk \
@@ -119,6 +136,10 @@ upgrade() {
     -e DATABASE_NAME=${DB} \
     -e DATABASE_USER=lisk \
     -e DATABASE_PASSWORD=password \
+    -e REDIS_ENABLED=true \
+    -e REDIS_HOST=redis \
+    -e REDIS_PORT=6379 \
+    -e REDIS_DB=${REDISINSTANCE} \
     -e LOG_LEVEL=info \
     --name ${NAME} \
     --net lisk \
@@ -137,6 +158,9 @@ uninstall() {
           docker rm pgadmin &> /dev/null
           if [ "$(docker ps -q -f name=postgresql)" ]; then docker stop postgresql &> /dev/null; fi
           docker rm postgresql &> /dev/null
+          if [ "$(docker ps -q -f name=redis)" ]; then docker stop redis &> /dev/null; fi
+          docker rm redis &> /dev/null
+          if [ "$(docker ps -q -f name=postgresql)" ]; then docker stop postgresql &> /dev/null; fi
           docker network rm lisk &> /dev/null
         fi
       fi
@@ -178,6 +202,10 @@ reset() {
   docker start ${NAME} &> /dev/null
 }
 
+ssh() {
+  docker exec -it ${NAME} /bin/bash
+}
+
 status() {
   docker ps
 }
@@ -194,6 +222,7 @@ setupnetwork() {
       PORT=8000
       OTHER1=testnet
       OTHER2=localnet
+      REDISINSTANCE=0
     elif [ "$NETWORK" == "test" ]
     then
       NAME=testnet
@@ -202,6 +231,7 @@ setupnetwork() {
       PORT=7000
       OTHER1=mainnet
       OTHER2=localnet
+      REDISINSTANCE=1
     else
       NAME=localnet
       DB=lisk_local
@@ -209,6 +239,7 @@ setupnetwork() {
       PORT=4000
       OTHER1=mainnet
       OTHER2=testnet
+      REDISINSTANCE=2
     fi
 
   else 
@@ -218,23 +249,23 @@ setupnetwork() {
 
 case "$1" in
   start)
-    echo "starting lisk-docker..."
     setupnetwork $@
+    echo "starting ${NAME}..."
     start $NETWORK
     ;;
   stop)
-    echo "stopping lisk-docker..."
     setupnetwork $@
+    echo "stopping ${NAME}..."
     stop $NETWORK
     ;;
   uninstall)
-    echo "uninstalling lisk-docker..."
     setupnetwork $@
+    echo "uninstalling ${NAME}..."
     uninstall $NETWORK
     ;;
   upgrade)
-    echo "upgrading lisk-docker..."
     setupnetwork $@
+    echo "upgrading ${NAME}..."
     upgrade $NETWORK
     ;;
   logs)
@@ -244,9 +275,14 @@ case "$1" in
     logs $NETWORK $@
     ;;
   reset)
-    echo "resetting lisk-docker..."
     setupnetwork $@
+    echo "resetting ${NAME}..."
     reset $NETWORK $3
+    ;;
+  ssh)
+    setupnetwork $@
+    echo "logging into ${NAME}..."
+    ssh $NETWORK
     ;;
   status)
     echo "status of lisk-docker..."
