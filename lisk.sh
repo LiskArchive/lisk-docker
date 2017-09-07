@@ -13,7 +13,7 @@
 #%                                   default network is main
 #%    stop [network]                 Stop all docker containers for a specific network
 #%                                   default network is main
-#%    delete [network]               uninstall all docker containers for a specific network
+#%    uninstall [network]            uninstall all docker containers for a specific network
 #%                                   default network is main
 #%    upgrade [network]              upgrade all docker containers for a specific network
 #%                                   default network is main
@@ -219,38 +219,38 @@ setupnetwork() {
 case "$1" in
   start)
     echo "starting lisk-docker..."
-    setupnetwork
+    setupnetwork $@
     start $NETWORK
     ;;
   stop)
     echo "stopping lisk-docker..."
-    setupnetwork
+    setupnetwork $@
     stop $NETWORK
     ;;
-  delete)
-    echo "deleting lisk-docker..."
-    setupnetwork
+  uninstall)
+    echo "uninstalling lisk-docker..."
+    setupnetwork $@
     uninstall $NETWORK
     ;;
   upgrade)
     echo "upgrading lisk-docker..."
-    setupnetwork
+    setupnetwork $@
     upgrade $NETWORK
     ;;
   logs)
-    setupnetwork
+    setupnetwork $@
     shift
     shift
     logs $NETWORK $@
     ;;
   reset)
     echo "resetting lisk-docker..."
-    setupnetwork
+    setupnetwork $@
     reset $NETWORK $3
     ;;
   status)
     echo "status of lisk-docker..."
-    setupnetwork
+    setupnetwork $@
     status
     ;;
   version)
