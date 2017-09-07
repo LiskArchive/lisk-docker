@@ -56,7 +56,20 @@ docker push username/lisk
 #### 6. Run the image
 
 ```
-docker run -d --restart=always -p 0.0.0.0:7000:7000 username/lisk
+docker run -d --restart=always \
+-p 4000:4000 \
+-e DATABASE_HOST=postgresql \
+-e DATABASE_NAME=lisk_main \
+-e DATABASE_USER=lisk \
+-e DATABASE_PASSWORD=password \
+-e REDIS_ENABLED=true \
+-e REDIS_HOST=redis \
+-e REDIS_PORT=6379 \
+-e REDIS_DB=0 \
+-e FORGING_WHITELIST_IP=127.0.0.1 \
+-e LOG_LEVEL=info \
+--name localnet \
+username/lisk:version
 ```
 
 For more details please read: https://github.com/LiskHQ/lisk-wiki/wiki/Docker-Install
@@ -70,74 +83,130 @@ gzip -9 lisk-docker.tar.gz
 
 ***
 
-## Using Docker Compose 
+## Using lisk.sh
 
-#### 1. Starting a container with Docker Compose
+#### 1. Starting a container with lisk.sh
 
 In order to start a Lisk-Docker installation, the following command should be run depending on the network:
 
 ** Mainnet **
 ```
-wget https://raw.githubusercontent.com/LiskHQ/lisk-docker/development/docker-compose-liskmain.yml
-docker-compose -f docker-compose-liskmain.yml up -d
+wget https://raw.githubusercontent.com/LiskHQ/lisk-docker/development/lisk.sh
+chmod +x lisk.sh
+./lisk.sh start main
 ```
 
 ** Testnet **
 
 ```
-wget https://raw.githubusercontent.com/LiskHQ/lisk-docker/development/docker-compose-lisktest.yml
-docker-compose -f docker-compose-lisktest.yml up -d
+wget https://raw.githubusercontent.com/LiskHQ/lisk-docker/development/lisk.sh
+chmod +x lisk.sh
+./lisk.sh start test
 ```
 
-#### 2. Stopping a container with Docker Compose
+#### 2. Stopping a container with lisk.sh
 
 ** Mainnet **
 ```
-docker-compose -f docker-compose-liskmain.yml down
+./lisk.sh stop main
 ```
 
 ** Testnet **
 
 ```
-docker-compose -f docker-compose-lisktest.yml down
+./lisk.sh stop test
 ```
 
-
-#### 3. Using an external postgresql database
-
-Passing the following environment variables to the container using `-e VARX=VALX` will allow you to connect to an external postgresql server or container:
-
-- DATABASE_HOST
-- DATABASE_PORT
-- DATABASE_NAME
-- DATABASE_USER
-- DATABASE_PASSWORD
-
-#### 4. Docker Compose File Usage
-
-Example:
+#### 3. lisk.sh manual
 
 ```
-version: '3'
-services:
-  lisk-node:
-    restart: always
-    image: lisk/mainnet:latest
-    ports:
-      - "8000:8000"
-    environment:
-      - DATABASE_HOST=postgresql
-      - DATABASE_NAME=lisk_main
-      - DATABASE_USER=lisk_main
-      - DATABASE_PASSWORD=password
-    links:
-      - PostgreSQL:postgresql
-  PostgreSQL:
-    restart: always
-    image: postgres:9.6.3
-    environment:
-      - POSTGRES_USER=lisk_main
-      - POSTGRES_PASSWORD=password
+┗ ./lisk.sh
+ SYNOPSIS
+    lisk.sh [command] args ...
+
+ DESCRIPTION
+    Lisk Docker Utility Script
+
+ OPTIONS
+    start [network] [forging ip]    Start All docker containers for a specific network
+                                    default network is main
+    stop [network]                  Stop all docker containers for a specific network
+                                    default network is main
+                                    optional whitelist ip for forging
+    uninstall [network]             uninstall all docker containers for a specific network
+                                    default network is main
+    upgrade [network] [forging ip]  upgrade all docker containers for a specific network
+                                    default network is main
+                                    optional whitelist ip for forging
+    logs [network] [args ...]       get logs for a specific network
+                                    default network is main
+                                    optional args:
+                                    --details (Show extra details provided to logs)
+                                    --follow, -f (Follow log output)
+                                    --since (logs since timestamp e.g. 2013-01-02T13:23:37 or relative e.g. 42m)
+                                    --tail (Number of lines to show from the end of the logs)
+                                    --timestamps, -t (Show timestamps)
+    reset [network] [url]           Reset the database and start syncing blocks again.
+                                    default network is main
+                                    Optianal snapshot url, default is from LiskHQ
+    ssh [network]                   Log in to the container for a specific network
+                                    default network is main
+    status                          Prints the status of lisk-docker.
+    help                            Print this help
+    version                         Print script information
+
+ EXAMPLES
+    lisk.sh start main
+
+ IMPLEMENTATION
+    version         lisk.sh 0.0.1
+    author          Ruben Callewaert (https://github.com/5an1ty/)
+    license         GNU General Public License
+
+```
+
+## Advanced
+
+This is an advanced section for users familiar with docker!
+
+#### 1. Running the node container and nothing else
+
+** Mainnet **
+
+```
+docker run -d --restart=always \
+-p 8000:8000 \
+-e DATABASE_HOST=postgresql \
+-e DATABASE_NAME=lisk_main \
+-e DATABASE_USER=lisk \
+-e DATABASE_PASSWORD=password \
+-e REDIS_ENABLED=true \
+-e REDIS_HOST=redis \
+-e REDIS_PORT=6379 \
+-e REDIS_DB=0 \
+-e FORGING_WHITELIST_IP=127.0.0.1 \
+-e LOG_LEVEL=info \
+--name mainnet \
+lisk/mainnet:latest
+```
+
+** Testnet **
+
+```
+docker run -d --restart=always \
+-p 7000:7000 \
+-e DATABASE_HOST=postgresql \
+-e DATABASE_NAME=lisk_main \
+-e DATABASE_USER=lisk \
+-e DATABASE_PASSWORD=password \
+-e REDIS_ENABLED=true \
+-e REDIS_HOST=redis \
+-e REDIS_PORT=6379 \
+-e REDIS_DB=0 \
+-e FORGING_WHITELIST_IP=127.0.0.1 \
+-e LOG_LEVEL=info \
+--name testnet \
+lisk/testnet:latest
 ```
 
 ## Useful Commands

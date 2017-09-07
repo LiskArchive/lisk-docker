@@ -13,10 +13,12 @@
 #%                                    default network is main
 #%    stop [network]                  Stop all docker containers for a specific network
 #%                                    default network is main
+#%                                    optional whitelist ip for forging
 #%    uninstall [network]             uninstall all docker containers for a specific network
 #%                                    default network is main
 #%    upgrade [network] [forging ip]  upgrade all docker containers for a specific network
 #%                                    default network is main
+#%                                    optional whitelist ip for forging
 #%    logs [network] [args ...]       get logs for a specific network
 #%                                    default network is main
 #%                                    optional args:
