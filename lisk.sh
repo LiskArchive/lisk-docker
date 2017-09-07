@@ -10,12 +10,12 @@
 #%
 #% OPTIONS
 #%    -s [network], --start [network]                 Start All docker containers for a specific network
-#%                                                    default is main
+#%                                                    default network is main
 #%    -p [network], --stop [network]                  Stop all docker containers for a specific network
 #%                                                    default network is main
 #%    -d [network], --delete [network]                uninstall all docker containers for a specific network
 #%                                                    default network is main
-#%    -u [network], --upgrade [network]               uninstall all docker containers for a specific network
+#%    -u [network], --upgrade [network]               upgrade all docker containers for a specific network
 #%                                                    default network is main
 #%    -l [network], --logs [network] [args ...]       get logs for a specific network
 #%                                                    default network is main
@@ -63,15 +63,18 @@ start() {
     NAME=mainnet
     DB=lisk_main
     IMAGE=lisk/mainnet:latest
+    PORT=8000
   elif [ "$1" == "test" ]
   then
     NAME=testnet
     DB=lisk_test
     IMAGE=lisk/testnet:latest
+    PORT=7000
   else
     NAME=localnet
     DB=lisk_local
     IMAGE=lisk-docker:latest
+    PORT=4000
   fi
 
   if [ ! "$(docker ps -q -f name=postgresql)" ]; then
@@ -106,7 +109,7 @@ start() {
       docker start ${NAME}
     else
       docker run -d --restart=always \
-      -p 8000:8000 \
+      -p ${PORT}:${PORT} \
       -e DATABASE_HOST=postgresql \
       -e DATABASE_NAME=${DB} \
       -e DATABASE_USER=lisk \
@@ -129,7 +132,7 @@ stop() {
   else
     NAME=localnet
   fi
-  if [ ! "$(docker ps -q -f name=${NAME})" ]; then docker stop ${NAME}; fi
+  if [ "$(docker ps -q -f name=${NAME})" ]; then docker stop ${NAME}; fi
 }
 
 upgrade() {
@@ -137,16 +140,18 @@ upgrade() {
   then
     NAME=mainnet
     IMAGE=lisk/mainnet:latest
+    PORT=8000
   elif [ "$1" == "test" ]
   then
     NAME=testnet
     IMAGE=lisk/testnet:latest
+    PORT=7000
   fi
   if [ "$(docker ps -q -f name=${NAME})" ]; then docker stop ${NAME} &> /dev/null; fi
   docker rm ${NAME} &> /dev/null
   docker pull ${IMAGE} &> /dev/null
   docker run -d --restart=always \
-    -p 8000:8000 \
+    -p ${PORT}:${PORT} \
     -e DATABASE_HOST=postgresql \
     -e DATABASE_NAME=${DB} \
     -e DATABASE_USER=lisk \
@@ -226,7 +231,6 @@ reset() {
   if [ -z "$2" ]
   then
     docker run --rm \
-      -p 8000:8000 \
       -e DATABASE_HOST=postgresql \
       -e DATABASE_NAME=${DB} \
       -e DATABASE_USER=lisk \
@@ -235,10 +239,8 @@ reset() {
       --net lisk \
       ${IMAGE} \
       reset
-      docker start ${NAME} &> /dev/null
   else
     docker run --rm \
-      -p 8000:8000 \
       -e DATABASE_HOST=postgresql \
       -e DATABASE_NAME=${DB} \
       -e DATABASE_USER=lisk \
@@ -248,8 +250,8 @@ reset() {
       --net lisk \
       ${IMAGE} \
       reset
-      docker start ${NAME} &> /dev/null
   fi
+  docker start ${NAME} &> /dev/null
 }
 
 case "$1" in
