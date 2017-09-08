@@ -83,46 +83,46 @@ gzip -9 lisk-docker.tar.gz
 
 ***
 
-## Using lisk.sh
+## Using lisk-docker.sh
 
-#### 1. Starting a container with lisk.sh
+#### 1. Starting a container with lisk-docker.sh
 
 In order to start a Lisk-Docker installation, the following command should be run depending on the network:
 
 ** Mainnet **
 ```
-wget https://raw.githubusercontent.com/LiskHQ/lisk-docker/development/lisk.sh
-chmod +x lisk.sh
-./lisk.sh start main
+wget https://raw.githubusercontent.com/LiskHQ/lisk-docker/development/lisk-docker.sh
+chmod +x lisk-docker.sh
+./lisk-docker.sh start main
 ```
 
 ** Testnet **
 
 ```
-wget https://raw.githubusercontent.com/LiskHQ/lisk-docker/development/lisk.sh
-chmod +x lisk.sh
-./lisk.sh start test
+wget https://raw.githubusercontent.com/LiskHQ/lisk-docker/development/lisk-docker.sh
+chmod +x lisk-docker.sh
+./lisk-docker.sh start test
 ```
 
-#### 2. Stopping a container with lisk.sh
+#### 2. Stopping a container with lisk-docker.sh
 
 ** Mainnet **
 ```
-./lisk.sh stop main
+./lisk-docker.sh stop main
 ```
 
 ** Testnet **
 
 ```
-./lisk.sh stop test
+./lisk-docker.sh stop test
 ```
 
-#### 3. lisk.sh manual
+#### 3. lisk-docker.sh manual
 
 ```
-┗ ./lisk.sh
+┗ ./lisk-docker.sh
  SYNOPSIS
-    lisk.sh [command] args ...
+    lisk-docker.sh [command] args ...
 
  DESCRIPTION
     Lisk Docker Utility Script
@@ -156,10 +156,10 @@ chmod +x lisk.sh
     version                         Print script information
 
  EXAMPLES
-    lisk.sh start main
+    lisk-docker.sh start main
 
  IMPLEMENTATION
-    version         lisk.sh 0.0.1
+    version         lisk-docker.sh 0.0.1
     author          Ruben Callewaert (https://github.com/5an1ty/)
     license         GNU General Public License
 
