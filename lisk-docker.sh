@@ -129,8 +129,8 @@ start() {
 
 stop() {
   if [ "$(docker ps -q -f name=${NAME})" ]; then docker stop ${NAME}; fi
-  docker rm ${NAME}
-  docker volume rm $(docker volume ls -f dangling=true -q) > /dev/null
+  if [ "$(docker ps -aq -f status=exited -f name=${NAME})" ]; then docker rm ${NAME} &> /dev/null; fi
+  docker volume rm $(docker volume ls -f dangling=true -q) &> /dev/null
 }
 
 upgrade() {
@@ -181,7 +181,11 @@ uninstall() {
 
 logs() {
   shift
-  docker logs $@ ${NAME}
+  if [ "$(docker ps -q -f name=${NAME})" ]; then
+    docker logs $@ ${NAME}
+  else
+    echo "${NAME} does not seem to be running, try lisk-docker.sh start ${NETWORK}"
+  fi
 }
 
 reset() {
@@ -214,7 +218,11 @@ reset() {
 }
 
 ssh() {
-  docker exec -it ${NAME} /bin/bash
+  if [ "$(docker ps -q -f name=${NAME})" ]; then
+    docker exec -it ${NAME} /bin/bash
+  else
+    echo "${NAME} does not seem to be running, try lisk-docker.sh start ${NETWORK}"
+  fi
 }
 
 status() {
