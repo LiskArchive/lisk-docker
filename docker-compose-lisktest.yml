@@ -10,6 +10,11 @@ services:
       - DATABASE_NAME=lisk_test
       - DATABASE_USER=lisk
       - DATABASE_PASSWORD=password
+      - REDIS_ENABLED=true
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_DB=1
+      - FORGING_WHITELIST_IP=172.0.0.1
       - LOG_LEVEL=info
     links:
       - PostgreSQL:postgresql
@@ -21,5 +26,10 @@ services:
     environment:
       - POSTGRES_USER=lisk
       - POSTGRES_PASSWORD=password
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+  Redis:
+    restart: always
+    image: redis
     volumes:
       - /etc/localtime:/etc/localtime:ro

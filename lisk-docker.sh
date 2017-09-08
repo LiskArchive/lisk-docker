@@ -221,7 +221,7 @@ status() {
   docker ps
 }
 
-setupnetwork() {
+setupNetwork() {
   NETWORK=${2:-main}
   if [[ "$NETWORK" == "main" || "$NETWORK" == "test" || "$NETWORK" == "local" ]]; then
 
@@ -260,44 +260,44 @@ setupnetwork() {
 
 case "$1" in
   start)
-    setupnetwork $@
+    setupNetwork $@
     echo "starting ${NAME}..."
     start $NETWORK $3
     ;;
   stop)
-    setupnetwork $@
+    setupNetwork $@
     echo "stopping ${NAME}..."
     stop $NETWORK
     ;;
   uninstall)
-    setupnetwork $@
+    setupNetwork $@
     echo "uninstalling ${NAME}..."
     uninstall $NETWORK
     ;;
   upgrade)
-    setupnetwork $@
+    setupNetwork $@
     echo "upgrading ${NAME}..."
     upgrade $NETWORK $3
     ;;
   logs)
-    setupnetwork $@
+    setupNetwork $@
     shift
     shift
     logs $NETWORK $@
     ;;
   reset)
-    setupnetwork $@
+    setupNetwork $@
     echo "resetting ${NAME}..."
     reset $NETWORK $3
     ;;
   ssh)
-    setupnetwork $@
+    setupNetwork $@
     echo "logging into ${NAME}..."
     ssh $NETWORK
     ;;
   status)
     echo "status of lisk-docker..."
-    setupnetwork $@
+    setupNetwork $@
     status
     ;;
   version)
