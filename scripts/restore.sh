@@ -3,8 +3,8 @@
 NETWORK="$1"
 
 download_blockchain() {
-  echo "Downloading blockchain snapshot..."
   DEFAULT_SNAPSHOT_URL="https://downloads.lisk.io/lisk/$NETWORK/blockchain.db.gz"
+  echo "Downloading blockchain snapshot... (${SNAPSHOT_URL:=$DEFAULT_SNAPSHOT_URL})"
   curl -o blockchain.db.gz "${SNAPSHOT_URL:=$DEFAULT_SNAPSHOT_URL}" &> /dev/null
   if [ $? == 0 ] && [ -f blockchain.db.gz ]; then
     gunzip -q blockchain.db.gz &> /dev/null

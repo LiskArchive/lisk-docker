@@ -158,7 +158,7 @@ upgrade() {
 
 uninstall() {
   if [ "$(docker ps -q -f name=${NAME})" ]; then docker stop ${NAME} &> /dev/null; fi
-  docker rm ${NAME} &> /dev/null
+  if [ "$(docker ps -aq -f status=exited -f name=${NAME})" ]; then docker rm ${NAME} &> /dev/null; fi
 
   if [ ! "$(docker ps -q -f name=${OTHER1})" ]; then
     if [ ! "$(docker ps -aq -f status=exited -f name=${OTHER1})" ]; then
@@ -176,7 +176,7 @@ uninstall() {
       fi
     fi
   fi
-  docker volume rm $(docker volume ls -f dangling=true -q) > /dev/null
+  docker volume rm $(docker volume ls -f dangling=true -q) &> /dev/null
 }
 
 logs() {

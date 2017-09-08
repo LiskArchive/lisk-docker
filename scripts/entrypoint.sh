@@ -73,7 +73,7 @@ then
 elif [ "$COMMAND" == "reset" ]
 then
   echo "Running reset"
-  dropdb -h "$DATABASE_HOST" -U "$DATABASE_USER" -w lisk_local 
+  dropdb -h "$DATABASE_HOST" -U "$DATABASE_USER" -w $DATABASE_NAME 
   psql -h "$DATABASE_HOST" -U "$DATABASE_USER" -d "$DATABASE_USER" -w -c "CREATE DATABASE ${DATABASE_NAME};"
   cd ./lisk
   ../restore.sh $NETWORK
