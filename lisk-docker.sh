@@ -75,7 +75,7 @@ start() {
       -e POSTGRES_PASSWORD=password \
       --name postgresql \
       --net lisk \
-      postgres:9.6.3
+      postgres:9.6.5
     fi
   fi
 

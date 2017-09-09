@@ -22,7 +22,7 @@ services:
       - /etc/localtime:/etc/localtime:ro
   PostgreSQL:
     restart: always
-    image: postgres:9.6.3
+    image: postgres:9.6.5
     environment:
       - POSTGRES_USER=lisk
       - POSTGRES_PASSWORD=password
