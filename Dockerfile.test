@@ -6,7 +6,17 @@ LABEL description="Lisk Docker Image - Testnet" version="1.4.2"
 WORKDIR /root
 RUN wget -q https://www.postgresql.org/media/keys/ACCC4CF8.asc -O - | apt-key add -
 RUN echo "deb http://apt.postgresql.org/pub/repos/apt/ jessie-pgdg main" >> /etc/apt/sources.list.d/pgdg.list
-RUN apt-get update && apt-get install -y curl git gzip libtool nano wget tar jq sudo postgresql-client-9.6
+RUN apt-get update -y && DEBIAN_FRONTEND=noninteractive apt-get install -qy \
+  curl \
+  git \
+  gzip \
+  libtool \
+  nano \
+  wget \
+  tar \
+  jq \
+  sudo \
+  postgresql-client-9.6
 
 # Add Lisk User
 RUN useradd lisk -s /bin/bash -m
