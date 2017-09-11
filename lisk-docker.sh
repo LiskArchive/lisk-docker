@@ -13,7 +13,7 @@
 #%                                    default network is main
 #%    start [network]                 Start the docker container for a specific network
 #%                                    default network is main
-#%    stop [network]                  Stop all docker containers for a specific network
+#%    stop [network]                  Stop the docker container for a specific network
 #%                                    default network is main
 #%                                    optional whitelist ip for forging
 #%    uninstall [network]             uninstall all docker containers for a specific network
@@ -74,6 +74,7 @@ install() {
     if [ "$(docker ps -aq -f status=exited -f name=postgresql)" ]; then
       docker start postgresql > /dev/null
     else
+      if [ ! "$(docker volume ls -q -f name=postgresdata)" ]; then docker volume create postgresdata > /dev/null; fi
       docker pull ${POSTGRESIMAGE} > /dev/null
       docker run -d --restart=always \
       -e POSTGRES_USER=lisk \
@@ -102,8 +103,16 @@ install() {
     if [ "$(docker ps -aq -f status=exited -f name=${NAME})" ]; then
       docker rm ${NAME} &> /dev/null
     fi
-    if [ ! "$(docker volume ls -q -f name=postgresdata)" ]; then docker volume create postgresdata > /dev/null; fi
-    if [ "$NETWORK" != "local" ]; then docker pull ${IMAGE} &> /dev/null; fi
+    if [ "$NETWORK" != "local" ]; then
+      docker pull ${IMAGE} &> /dev/null
+    elif [ ! "$(docker image ls -q -f reference=lisk-docker)" ]; then
+      echo "Building image, this can take a very long time... Go grab a coffee!"
+      docker build --no-cache -f Dockerfile.local -t ${IMAGE} . &> /dev/null
+      if [ $? != 0 ]; then
+        echo "${red}✘${reset} Local image build failed, exiting..."
+        exit 1
+      fi
+    fi
     docker run -d --restart=always \
     -p ${PORT}:${PORT} \
     -e DATABASE_HOST=postgresql \
@@ -204,12 +213,12 @@ upgrade() {
     if [ "$(docker ps -q -f name=${OTHER1})" ]
     then
       OTHER1FOUND=true
-      docker stop ${OTHER1} > /dev/null
+      stop ${OTHER1}
     fi
     if [ "$(docker ps -q -f name=${OTHER2})" ]
     then
       OTHER2FOUND=true
-      docker stop ${OTHER1} > /dev/null
+      stop ${OTHER2}
     fi
 
     if [ "$(docker ps -q -f name=pgadmin)" ]; then
@@ -226,10 +235,14 @@ upgrade() {
     if [ "$(docker ps -q -f name=postgresql)" ]; then docker stop postgresql &> /dev/null; fi
     docker rm postgresql &> /dev/null
 
+    if [ "$NETWORK" == "local" ]; then
+      docker rm ${NAME} > /dev/null
+      docker rmi ${IMAGE} > /dev/null
+    fi 
     install $@
 
-    if [ ! -z "$OTHER1FOUND" ]; then docker start ${OTHER1} > /dev/null; fi
-    if [ ! -z "$OTHER2FOUND" ]; then docker start ${OTHER2} > /dev/null; fi
+    if [ ! -z "$OTHER1FOUND" ]; then start ${OTHER1}; fi
+    if [ ! -z "$OTHER2FOUND" ]; then start ${OTHER2}; fi
     if [ ! -z "$PGADMINFOUND" ]; then pgAdmin start ${PGADMINPASS}> /dev/null; fi
 
     docker volume rm $(docker volume ls -f dangling=true -q) &> /dev/null
@@ -351,7 +364,7 @@ setupNetwork() {
     fi
 
   else 
-    echo "Incorrect network, valid options are: main, test, local"
+    echo "${red}✘${reset} Incorrect network, valid options are: main, test, local"
     exit 1
   fi
 }
