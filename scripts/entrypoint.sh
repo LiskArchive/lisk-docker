@@ -50,7 +50,7 @@ touch ./.pgpass
 PGPASSFILE="/home/lisk/.pgpass"
 echo "$DATABASE_HOST:$DATABASE_PORT:*:$DATABASE_USER:$DATABASE_PASSWORD" > $PGPASSFILE
 chmod 600 $PGPASSFILE
-until psql -h "$DATABASE_HOST" -U "$DATABASE_USER" -d "$DATABASE_USER" -w -c '\l' &> /dev/null; do
+until psql -h "$DATABASE_HOST" -U "$DATABASE_USER" -d "postgres" -w -c '\l' &> /dev/null; do
   echo "Postgres is unavailable - sleeping"
   sleep 1
 done
@@ -65,7 +65,7 @@ export DATABASE_PASSWORD
 
 if [ -z "$COMMAND" ]
 then
-  psql -h "$DATABASE_HOST" -U "$DATABASE_USER" -d "$DATABASE_USER" -w -c "CREATE DATABASE ${DATABASE_NAME};" &> /dev/null
+  createdb -h "$DATABASE_HOST" -U "$DATABASE_USER" -w $DATABASE_NAME
   cd ./lisk
   ../restore.sh $NETWORK
   echo "Starting node"
@@ -73,8 +73,8 @@ then
 elif [ "$COMMAND" == "reset" ]
 then
   echo "Running reset"
-  dropdb -h "$DATABASE_HOST" -U "$DATABASE_USER" -w $DATABASE_NAME 
-  psql -h "$DATABASE_HOST" -U "$DATABASE_USER" -d "$DATABASE_USER" -w -c "CREATE DATABASE ${DATABASE_NAME};"
+  dropdb -h "$DATABASE_HOST" -U "$DATABASE_USER" -w $DATABASE_NAME
+  createdb -h "$DATABASE_HOST" -U "$DATABASE_USER" -w $DATABASE_NAME
   cd ./lisk
   ../restore.sh $NETWORK
 else

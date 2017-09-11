@@ -9,7 +9,9 @@
 #%    Lisk Docker Utility Script
 #%
 #% OPTIONS
-#%    start [network] [forging ip]    Start All docker containers for a specific network
+#%    install [network] [forging ip]  Install All docker containers for a specific network
+#%                                    default network is main
+#%    start [network]                 Start the docker container for a specific network
 #%                                    default network is main
 #%    stop [network]                  Stop all docker containers for a specific network
 #%                                    default network is main
@@ -33,6 +35,9 @@
 #%    ssh [network]                   Log in to the container for a specific network
 #%                                    default network is main
 #%    status                          Prints the status of lisk-docker.
+#%    pgadmin [command] [password]    Starts or stops pgadmin.
+#%                                    valid options for command: start, stop, changepw, uninstall
+#%                                    optional password to set for logging in
 #%    help                            Print this help
 #%    version                         Print script information
 #%
@@ -58,87 +63,48 @@ usage() { printf "Usage: "; head -${SCRIPT_HEADSIZE:-99} ${0} | grep -e "^#+" | 
 usagefull() { head -${SCRIPT_HEADSIZE:-99} ${0} | grep -e "^#[%+-]" | sed -e "s/^#[%+-]//g" -e "s/\${SCRIPT_NAME}/${SCRIPT_NAME}/g" ; }
 scriptinfo() { head -${SCRIPT_HEADSIZE:-99} ${0} | grep -e "^#-" | sed -e "s/^#-//g" -e "s/\${SCRIPT_NAME}/${SCRIPT_NAME}/g"; }
 
-start() {
+install() {
   FORGINGWHITELISTIP=$2
 
-  docker network inspect lisk &> /dev/null
-  if [ $? != 0 ]; then
-    docker network create lisk
+  if [ ! "$(docker network ls -q -f name=lisk)" ]; then
+    docker network create lisk > /dev/null
   fi
 
   if [ ! "$(docker ps -q -f name=postgresql)" ]; then
     if [ "$(docker ps -aq -f status=exited -f name=postgresql)" ]; then
-      docker start postgresql
+      docker start postgresql > /dev/null
     else
+      docker pull ${POSTGRESIMAGE} > /dev/null
       docker run -d --restart=always \
       -e POSTGRES_USER=lisk \
+      -e POSTGRES_DB=postgres \
       -e POSTGRES_PASSWORD=password \
+      -v postgresdata:/var/lib/postgresql/data \
       --name postgresql \
       --net lisk \
-      postgres:9.6.5
-    fi
-  fi
-
-  if [ ! "$(docker ps -q -f name=pgadmin)" ]; then
-    if [ "$(docker ps -aq -f status=exited -f name=pgadmin)" ]; then
-      docker start pgadmin
-    else
-      docker run  -d --restart=always \
-      -p 5050:5050 \
-      -e DEFAULT_USER=admin \
-      -e DEFAULT_PASSWORD=admin \
-      --name pgadmin \
-      --net lisk \
-      fenglc/pgadmin4
+      ${POSTGRESIMAGE} > /dev/null
     fi
   fi
 
   if [ ! "$(docker ps -q -f name=redis)" ]; then
     if [ "$(docker ps -aq -f status=exited -f name=redis)" ]; then
-      docker start redis
+      docker start redis > /dev/null
     else
+      docker pull ${REDISIMAGE} > /dev/null
       docker run -d --restart=always \
       --net lisk \
       --name redis \
-      redis
+      ${REDISIMAGE} > /dev/null
     fi
   fi
 
   if [ ! "$(docker ps -q -f name=${NAME})" ]; then
     if [ "$(docker ps -aq -f status=exited -f name=${NAME})" ]; then
-      docker start ${NAME}
-    else
-      docker run -d --restart=always \
-      -p ${PORT}:${PORT} \
-      -e DATABASE_HOST=postgresql \
-      -e DATABASE_NAME=${DB} \
-      -e DATABASE_USER=lisk \
-      -e DATABASE_PASSWORD=password \
-      -e REDIS_ENABLED=true \
-      -e REDIS_HOST=redis \
-      -e REDIS_PORT=6379 \
-      -e REDIS_DB=${REDISINSTANCE} \
-      -e FORGING_WHITELIST_IP=${FORGINGWHITELISTIP:=127.0.0.1} \
-      -e LOG_LEVEL=info \
-      --name ${NAME} \
-      --net lisk \
-      ${IMAGE}
+      docker rm ${NAME} &> /dev/null
     fi
-  fi
-}
-
-stop() {
-  if [ "$(docker ps -q -f name=${NAME})" ]; then docker stop ${NAME}; fi
-  if [ "$(docker ps -aq -f status=exited -f name=${NAME})" ]; then docker rm ${NAME} &> /dev/null; fi
-  docker volume rm $(docker volume ls -f dangling=true -q) &> /dev/null
-}
-
-upgrade() {
-  FORGINGWHITELISTIP=$2
-  if [ "$(docker ps -q -f name=${NAME})" ]; then docker stop ${NAME} &> /dev/null; fi
-  docker rm ${NAME} &> /dev/null
-  if [ "$1" != "local" ]; then docker pull ${IMAGE} &> /dev/null; fi
-  docker run -d --restart=always \
+    if [ ! "$(docker volume ls -q -f name=postgresdata)" ]; then docker volume create postgresdata > /dev/null; fi
+    if [ "$NETWORK" != "local" ]; then docker pull ${IMAGE} &> /dev/null; fi
+    docker run -d --restart=always \
     -p ${PORT}:${PORT} \
     -e DATABASE_HOST=postgresql \
     -e DATABASE_NAME=${DB} \
@@ -152,8 +118,125 @@ upgrade() {
     -e LOG_LEVEL=info \
     --name ${NAME} \
     --net lisk \
-    ${IMAGE}
-    docker volume rm $(docker volume ls -f dangling=true -q) > /dev/null
+    ${IMAGE} > /dev/null
+  fi
+
+  echo "${green}✔${reset} ${NAME} installed and started correctly"
+
+}
+
+pgAdmin() {
+  case "$1" in
+    stop)
+      if [ "$(docker ps -q -f name=pgadmin)" ]; then docker stop pgadmin > /dev/null; fi
+      echo "${green}✔${reset} pgadmin stopped successfully"
+      ;;
+    changepw)
+      if [ "$(docker ps -q -f name=pgadmin)" ]; then docker stop pgadmin > /dev/null ; fi
+      if [ "$(docker ps -aq -f status=exited -f name=pgadmin)" ]; then docker rm pgadmin > /dev/null ; fi
+      pgAdmin start $2
+      ;;
+    uninstall) 
+      if [ "$(docker ps -q -f name=pgadmin)" ]; then docker stop pgadmin > /dev/null ; fi
+      if [ "$(docker ps -aq -f status=exited -f name=pgadmin)" ]; then docker rm pgadmin > /dev/null ; fi
+      echo "${green}✔${reset} pgadmin uninstalled successfully"
+      ;;
+    *)
+      if [ ! "$(docker ps -q -f name=pgadmin)" ]; then
+        if [ "$(docker ps -aq -f status=exited -f name=pgadmin)" ]; then
+          docker start pgadmin > /dev/null
+        else
+          PASS=$2
+          PGADMINPASS=$(< /dev/urandom LC_CTYPE=C tr -dc _A-Z-a-z-0-9 | head -c 10; echo)
+          docker run  -d --restart=always \
+          -p 5050:5050 \
+          -e SERVER_MODE=true \
+          -e PGADMIN_SETUP_EMAIL=admin \
+          -e PGADMIN_SETUP_PASSWORD=${PASS:-$PGADMINPASS} \
+          --name pgadmin \
+          --net lisk \
+          ${PGADMINIMAGE} > /dev/null
+
+          echo "${green}✔${reset} Everything set up correctly, if you would like to investigate the lisk database you can do so by browsing to:"
+          echo "- http://localhost:5050"
+          echo "You can log in with the default credentials:"
+          echo "- user: admin"
+          echo "- password: ${PASS:-$PGADMINPASS}"
+          echo "You can change the password by executing lisk-docker.sh pgadmin change yourpassword"
+          echo "You can add a database connection with the following settings:"
+          echo "- hostname: postgresql"
+          echo "- port: 5432"
+          echo "- user: lisk"
+          echo "- password: password"
+        fi
+      fi
+      echo "${green}✔${reset} pgadim started successfully"
+      ;;
+  esac
+}
+
+start() {
+  if [ "$(docker ps -aq -f status=exited -f name=${1})" ]; then
+    docker start ${1} > /dev/null
+  else
+    echo "${red}✘${reset} Could not find ${1}"
+  fi
+  echo "${green}✔${reset} ${1} started successfully"
+}
+
+stop() {
+  if [ "$(docker ps -q -f name=${1})" ]; then docker stop ${1} > /dev/null; fi
+  echo "${green}✔${reset} ${1} stopped successfully"
+}
+
+upgrade() {
+  FORGINGWHITELISTIP=$2
+
+  if [ "$(docker ps -q -f name=${NAME})" ] || [ "$(docker ps -aq -f status=exited -f name=pgadmin)" ]; then
+
+    install $@ > /dev/null
+    if [ "$(docker ps -aq -f status=exited -f name=pgadmin)" ]; then pgAdmin start; fi
+
+    if [ "$(docker ps -q -f name=${NAME})" ]
+    then
+      stop ${NAME}
+    fi
+    if [ "$(docker ps -q -f name=${OTHER1})" ]
+    then
+      OTHER1FOUND=true
+      docker stop ${OTHER1} > /dev/null
+    fi
+    if [ "$(docker ps -q -f name=${OTHER2})" ]
+    then
+      OTHER2FOUND=true
+      docker stop ${OTHER1} > /dev/null
+    fi
+
+    if [ "$(docker ps -q -f name=pgadmin)" ]; then
+      PGADMINFOUND=true
+      PGADMINPASS=$(docker exec pgadmin sh -c 'echo "$PGADMIN_SETUP_PASSWORD"')
+      pgAdmin stop
+      if [ "$(docker ps -aq -f status=exited -f name=pgadmin)" ]; then docker rm pgadmin &> /dev/null; fi
+      docker pull ${PGADMINIMAGE}  > /dev/null
+    fi
+
+    if [ "$(docker ps -q -f name=redis)" ]; then docker stop redis &> /dev/null; fi
+    docker rm redis &> /dev/null
+
+    if [ "$(docker ps -q -f name=postgresql)" ]; then docker stop postgresql &> /dev/null; fi
+    docker rm postgresql &> /dev/null
+
+    install $@
+
+    if [ ! -z "$OTHER1FOUND" ]; then docker start ${OTHER1} > /dev/null; fi
+    if [ ! -z "$OTHER2FOUND" ]; then docker start ${OTHER2} > /dev/null; fi
+    if [ ! -z "$PGADMINFOUND" ]; then pgAdmin start ${PGADMINPASS}> /dev/null; fi
+
+    docker volume rm $(docker volume ls -f dangling=true -q) &> /dev/null
+    echo "${green}✔${reset} ${NAME} upgraded successfully"
+  else 
+    echo "${red}✘${reset} ${NAME} not installed"
+  fi
 }
 
 uninstall() {
@@ -170,13 +253,14 @@ uninstall() {
           docker rm postgresql &> /dev/null
           if [ "$(docker ps -q -f name=redis)" ]; then docker stop redis &> /dev/null; fi
           docker rm redis &> /dev/null
-          if [ "$(docker ps -q -f name=postgresql)" ]; then docker stop postgresql &> /dev/null; fi
-          docker network rm lisk &> /dev/null
+          if [ "$(docker volume ls -q -f name=postgresdata)" ]; then docker volume rm postgresdata &> /dev/null; fi
+          if [ "$(docker network ls -q -f name=lisk)" ]; then docker network rm lisk &> /dev/null; fi
         fi
       fi
     fi
   fi
   docker volume rm $(docker volume ls -f dangling=true -q) &> /dev/null
+  echo "${green}✔${reset} ${NAME} uninstalled successfully"
 }
 
 logs() {
@@ -184,12 +268,12 @@ logs() {
   if [ "$(docker ps -q -f name=${NAME})" ]; then
     docker logs $@ ${NAME}
   else
-    echo "${NAME} does not seem to be running, try lisk-docker.sh start ${NETWORK}"
+    echo "${red}✘${reset} ${NAME} does not seem to be running, try lisk-docker.sh start ${NETWORK}"
   fi
 }
 
 reset() {
-  if [ "$(docker ps -q -f name=${NAME})" ]; then docker stop ${NAME} &> /dev/null; fi
+  stop ${NAME} &> /dev/null
   sleep 5
   if [ -z "$2" ]
   then
@@ -201,7 +285,7 @@ reset() {
       -e LOG_LEVEL=info \
       --net lisk \
       ${IMAGE} \
-      reset
+      reset > /dev/null
   else
     docker run --rm \
       -e DATABASE_HOST=postgresql \
@@ -212,16 +296,17 @@ reset() {
       -e SNAPSHOT_URL="$2" \
       --net lisk \
       ${IMAGE} \
-      reset
+      reset > /dev/null
   fi
-  docker start ${NAME} &> /dev/null
+  start ${NAME} &> /dev/null
+  echo "${green}✔${reset} ${NAME} reset successfully"
 }
 
 ssh() {
   if [ "$(docker ps -q -f name=${NAME})" ]; then
     docker exec -it ${NAME} /bin/bash
   else
-    echo "${NAME} does not seem to be running, try lisk-docker.sh start ${NETWORK}"
+    echo "${red}✘${reset} ${NAME} does not seem to be running, try lisk-docker.sh start ${NETWORK}"
   fi
 }
 
@@ -232,6 +317,10 @@ status() {
 setupNetwork() {
   NETWORK=${2:-main}
   if [[ "$NETWORK" == "main" || "$NETWORK" == "test" || "$NETWORK" == "local" ]]; then
+
+    REDISIMAGE=redis:4.0
+    POSTGRESIMAGE=postgres:9.6.5
+    PGADMINIMAGE=5an1ty/pgadmin4:latest
 
     if [ "$NETWORK" == "main" ]
     then
@@ -263,19 +352,29 @@ setupNetwork() {
 
   else 
     echo "Incorrect network, valid options are: main, test, local"
+    exit 1
   fi
 }
 
+red=`tput setaf 1`
+green=`tput setaf 2`
+reset=`tput sgr0`
+
 case "$1" in
+  install)
+    setupNetwork $@
+    echo "installing ${NAME}..."
+    install $NETWORK $3
+    ;;
   start)
     setupNetwork $@
     echo "starting ${NAME}..."
-    start $NETWORK $3
+    start $NAME
     ;;
   stop)
     setupNetwork $@
     echo "stopping ${NAME}..."
-    stop $NETWORK
+    stop $NAME
     ;;
   uninstall)
     setupNetwork $@
@@ -304,9 +403,14 @@ case "$1" in
     ssh $NETWORK
     ;;
   status)
-    echo "status of lisk-docker..."
+    echo -e "status of lisk-docker..."
     setupNetwork $@
     status
+    ;;
+  pgadmin)
+    echo "running pgadmin ${2}..."
+    setupNetwork
+    pgAdmin $2 $3
     ;;
   version)
     scriptinfo
