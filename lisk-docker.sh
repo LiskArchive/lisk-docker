@@ -11,16 +11,18 @@
 #% OPTIONS
 #%    install [network] [forging ip]  Install All docker containers for a specific network
 #%                                    default network is main
+#%                                    optional whitelist ip for forging
 #%    start [network]                 Start the docker container for a specific network
 #%                                    default network is main
 #%    stop [network]                  Stop the docker container for a specific network
 #%                                    default network is main
-#%                                    optional whitelist ip for forging
+#%    forge [network] [ip]            Enable forging for a specified network
+#%                                    default network is main
+#%                                    ip that is allowed to enable forging
 #%    uninstall [network]             uninstall all docker containers for a specific network
 #%                                    default network is main
-#%    upgrade [network] [forging ip]  upgrade all docker containers for a specific network
+#%    upgrade [network]               upgrade all docker containers for a specific network
 #%                                    default network is main
-#%                                    optional whitelist ip for forging
 #%    logs [network] [args ...]       get logs for a specific network
 #%                                    default network is main
 #%                                    optional args:
@@ -102,34 +104,35 @@ install() {
 
 	if [ ! "$(docker ps -q -f name=${NAME})" ]; then
 		if [ "$(docker ps -aq -f status=exited -f name=${NAME})" ]; then
-			docker rm ${NAME} &> /dev/null
-		fi
-		if [ "$NETWORK" == "local" ]; then
-			if [ ! "$(docker image ls -q -f reference=lisk-docker)" ]; then
-				echo "Building ${NAME} image, this can take a very long time..."
-				docker build --no-cache -f Dockerfile.local -t ${IMAGE} . &> /dev/null
-				if [ $? != 0 ]; then
-					echo "${red}✘${reset} Local image build failed, exiting..."
-					exit 1
+			docker start ${NAME} &> /dev/null
+		else
+			if [ "$NETWORK" == "local" ]; then
+				if [ ! "$(docker image ls -q -f reference=lisk-docker)" ]; then
+					echo "Building ${NAME} image, this can take a very long time..."
+					docker build --no-cache -f Dockerfile.local -t ${IMAGE} . &> /dev/null
+					if [ $? != 0 ]; then
+						echo "${red}✘${reset} Local image build failed, exiting..."
+						exit 1
+					fi
 				fi
 			fi
+			docker run -d --restart=always \
+			-p ${PORT}:${PORT} \
+			-e DATABASE_HOST=postgresql \
+			-e DATABASE_NAME=${DB} \
+			-e DATABASE_USER=lisk \
+			-e DATABASE_PASSWORD=password \
+			-e REDIS_ENABLED=true \
+			-e REDIS_HOST=redis \
+			-e REDIS_PORT=6379 \
+			-e REDIS_DB=${REDISINSTANCE} \
+			-e FORGING_WHITELIST_IP=${FORGINGWHITELISTIP:=127.0.0.1} \
+			-e LOG_LEVEL=info \
+			-v /etc/localtime:/etc/localtime:ro \
+			--name ${NAME} \
+			--net lisk \
+			${IMAGE} > /dev/null
 		fi
-		docker run -d --restart=always \
-		-p ${PORT}:${PORT} \
-		-e DATABASE_HOST=postgresql \
-		-e DATABASE_NAME=${DB} \
-		-e DATABASE_USER=lisk \
-		-e DATABASE_PASSWORD=password \
-		-e REDIS_ENABLED=true \
-		-e REDIS_HOST=redis \
-		-e REDIS_PORT=6379 \
-		-e REDIS_DB=${REDISINSTANCE} \
-		-e FORGING_WHITELIST_IP=${FORGINGWHITELISTIP:=127.0.0.1} \
-		-e LOG_LEVEL=info \
-		-v /etc/localtime:/etc/localtime:ro \
-		--name ${NAME} \
-		--net lisk \
-		${IMAGE} > /dev/null
 	fi
 
 	echo "${green}✔${reset} ${NAME} installed and started correctly"
@@ -205,10 +208,17 @@ stop() {
 	echo "${green}✔${reset} ${1} stopped successfully"
 }
 
+forge() {
+	stop $NAME
+	docker rm $NAME > /dev/null
+	install $@ 
+}
+
 upgrade() {
 	if [ "$(docker ps -q -f name=${NAME})" ] || [ "$(docker ps -aq -f status=exited -f name=${NAME})" ]; then
 
 		install $@ > /dev/null
+		FORGINGWHITELISTIP=$(docker exec ${NAME} sh -c 'echo "$FORGING_WHITELIST_IP"')
 		if [ "$(docker ps -aq -f status=exited -f name=pgadmin)" ]; then pgAdmin start; fi
 
 		if [ "$(docker ps -q -f name=${NAME})" ]
@@ -248,7 +258,7 @@ upgrade() {
 			docker rmi ${IMAGE} > /dev/null
 		fi
 
-		install $@
+		install $NETWORK $FORGINGWHITELISTIP
 
 		if [ ! -z "$OTHER1FOUND" ]; then start ${OTHERNAME1}; fi
 		if [ ! -z "$OTHER2FOUND" ]; then start ${OTHERNAME2}; fi
@@ -405,6 +415,11 @@ run() {
 			echo "stopping ${NAME}..."
 			stop $NAME
 			;;
+		forge)
+			setupNetwork $@
+			echo "enabling forging on ${NAME}..."
+			forge $NETWORK $3
+			;;
 		uninstall)
 			setupNetwork $@
 			echo "uninstalling ${NAME}..."
@@ -413,7 +428,7 @@ run() {
 		upgrade)
 			setupNetwork $@
 			echo "upgrading ${NAME}..."
-			upgrade $NETWORK $3
+			upgrade $NETWORK
 			;;
 		logs)
 			setupNetwork $@

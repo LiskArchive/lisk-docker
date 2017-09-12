@@ -120,6 +120,7 @@ chmod +x lisk-docker.sh
 #### 3. lisk-docker.sh manual
 
 ```
+┗ ./lisk-docker.sh
  SYNOPSIS
     lisk-docker.sh [command] args ...
 
@@ -129,16 +130,18 @@ chmod +x lisk-docker.sh
  OPTIONS
     install [network] [forging ip]  Install All docker containers for a specific network
                                     default network is main
+                                    optional whitelist ip for forging
     start [network]                 Start the docker container for a specific network
                                     default network is main
     stop [network]                  Stop the docker container for a specific network
                                     default network is main
-                                    optional whitelist ip for forging
+    forge [network] [ip]            Enable forging for a specified network
+                                    default network is main
+                                    ip that is allowed to enable forging
     uninstall [network]             uninstall all docker containers for a specific network
                                     default network is main
-    upgrade [network] [forging ip]  upgrade all docker containers for a specific network
+    upgrade [network]               upgrade all docker containers for a specific network
                                     default network is main
-                                    optional whitelist ip for forging
     logs [network] [args ...]       get logs for a specific network
                                     default network is main
                                     optional args:
@@ -165,7 +168,8 @@ chmod +x lisk-docker.sh
  IMPLEMENTATION
     version         lisk-docker.sh 0.0.1
     author          Ruben Callewaert (https://github.com/5an1ty/)
-    license         GNU General Public License v3.0
+    license         GNU General Public License
+
 ```
 
 ## Using Docker Compose 
