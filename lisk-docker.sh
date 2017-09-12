@@ -81,6 +81,7 @@ install() {
       -e POSTGRES_DB=postgres \
       -e POSTGRES_PASSWORD=password \
       -v postgresdata:/var/lib/postgresql/data \
+      -v /etc/localtime:/etc/localtime:ro \
       --name postgresql \
       --net lisk \
       ${POSTGRESIMAGE} > /dev/null
@@ -95,6 +96,7 @@ install() {
       docker run -d --restart=always \
       --net lisk \
       --name redis \
+      -v /etc/localtime:/etc/localtime:ro \
       ${REDISIMAGE} > /dev/null
     fi
   fi
@@ -125,6 +127,7 @@ install() {
     -e REDIS_DB=${REDISINSTANCE} \
     -e FORGING_WHITELIST_IP=${FORGINGWHITELISTIP:=127.0.0.1} \
     -e LOG_LEVEL=info \
+    -v /etc/localtime:/etc/localtime:ro \
     --name ${NAME} \
     --net lisk \
     ${IMAGE} > /dev/null
@@ -162,6 +165,7 @@ pgAdmin() {
           -e SERVER_MODE=true \
           -e PGADMIN_SETUP_EMAIL=admin \
           -e PGADMIN_SETUP_PASSWORD=${PASS:-$PGADMINPASS} \
+          -v /etc/localtime:/etc/localtime:ro \
           --name pgadmin \
           --net lisk \
           ${PGADMINIMAGE} > /dev/null
