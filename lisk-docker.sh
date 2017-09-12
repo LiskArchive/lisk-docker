@@ -50,7 +50,7 @@
 #- IMPLEMENTATION
 #-    version         ${SCRIPT_NAME} 0.0.1
 #-    author          Ruben Callewaert (https://github.com/5an1ty/)
-#-    license         GNU General Public License
+#-    license         GNU General Public License v3.0
 #-
 #================================================================
 # END_OF_HEADER
