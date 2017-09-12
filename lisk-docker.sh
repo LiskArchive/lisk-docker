@@ -197,10 +197,10 @@ pgAdmin() {
 start() {
 	if [ "$(docker ps -aq -f status=exited -f name=${1})" ]; then
 		docker start ${1} > /dev/null
+		echo "${green}✔${reset} ${1} started successfully"
 	else
 		echo "${red}✘${reset} Could not find ${1}"
 	fi
-	echo "${green}✔${reset} ${1} started successfully"
 }
 
 stop() {
