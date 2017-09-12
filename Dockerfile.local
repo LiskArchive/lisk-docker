@@ -7,20 +7,20 @@ WORKDIR /root
 RUN wget -q https://www.postgresql.org/media/keys/ACCC4CF8.asc -O - | apt-key add -
 RUN echo "deb http://apt.postgresql.org/pub/repos/apt/ jessie-pgdg main" >> /etc/apt/sources.list.d/pgdg.list
 RUN apt-get update -y && DEBIAN_FRONTEND=noninteractive apt-get install -qy \
-  autoconf \
-  automake \
-  build-essential \
-  curl \
-  git \
-  gzip \
-  libtool \
-  nano \
-  python \
-  wget \
-  tar \
-  jq \
-  sudo \
-  postgresql-client-9.6
+	autoconf \
+	automake \
+	build-essential \
+	curl \
+	git \
+	gzip \
+	libtool \
+	nano \
+	python \
+	wget \
+	tar \
+	jq \
+	sudo \
+	postgresql-client-9.6
 RUN npm install -g babel
 
 # Add Lisk User
@@ -78,9 +78,6 @@ RUN npm run build
 USER root
 RUN npm install --global --production
 WORKDIR /home/lisk
-
-# hint local testing passphrase everywhere
-# wagon stock borrow episode laundry kitten salute link globe zero feed marble
 
 ENV TOP=true
 ENV TERM=xterm

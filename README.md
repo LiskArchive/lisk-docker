@@ -120,7 +120,6 @@ chmod +x lisk-docker.sh
 #### 3. lisk-docker.sh manual
 
 ```
-┗ ./lisk-docker.sh
  SYNOPSIS
     lisk-docker.sh [command] args ...
 
@@ -128,9 +127,11 @@ chmod +x lisk-docker.sh
     Lisk Docker Utility Script
 
  OPTIONS
-    start [network] [forging ip]    Start All docker containers for a specific network
+    install [network] [forging ip]  Install All docker containers for a specific network
                                     default network is main
-    stop [network]                  Stop all docker containers for a specific network
+    start [network]                 Start the docker container for a specific network
+                                    default network is main
+    stop [network]                  Stop the docker container for a specific network
                                     default network is main
                                     optional whitelist ip for forging
     uninstall [network]             uninstall all docker containers for a specific network
@@ -152,6 +153,9 @@ chmod +x lisk-docker.sh
     ssh [network]                   Log in to the container for a specific network
                                     default network is main
     status                          Prints the status of lisk-docker.
+    pgadmin [command] [password]    Starts or stops pgadmin.
+                                    valid options for command: start, stop, changepw, uninstall
+                                    optional password to set for logging in
     help                            Print this help
     version                         Print script information
 
@@ -161,8 +165,7 @@ chmod +x lisk-docker.sh
  IMPLEMENTATION
     version         lisk-docker.sh 0.0.1
     author          Ruben Callewaert (https://github.com/5an1ty/)
-    license         GNU General Public License
-
+    license         GNU General Public License v3.0
 ```
 
 ## Using Docker Compose 
