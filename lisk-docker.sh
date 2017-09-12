@@ -54,7 +54,7 @@
 # END_OF_HEADER
 #================================================================
 
- #== needed variables ==#
+	#== needed variables ==#
 SCRIPT_HEADSIZE=$(head -200 ${0} |grep -n "^# END_OF_HEADER" | cut -f1 -d:)
 SCRIPT_NAME="$(basename ${0})"
 
@@ -75,7 +75,6 @@ install() {
 			docker start postgresql > /dev/null
 		else
 			if [ ! "$(docker volume ls -q -f name=postgresdata)" ]; then docker volume create postgresdata > /dev/null; fi
-			docker pull ${POSTGRESIMAGE} > /dev/null
 			docker run -d --restart=always \
 			-e POSTGRES_USER=lisk \
 			-e POSTGRES_DB=postgres \
@@ -105,14 +104,14 @@ install() {
 		if [ "$(docker ps -aq -f status=exited -f name=${NAME})" ]; then
 			docker rm ${NAME} &> /dev/null
 		fi
-		if [ "$NETWORK" != "local" ]; then
-			docker pull ${IMAGE} &> /dev/null
-		elif [ ! "$(docker image ls -q -f reference=lisk-docker)" ]; then
-			echo "Building image, this can take a very long time... Go grab a coffee!"
-			docker build --no-cache -f Dockerfile.local -t ${IMAGE} . &> /dev/null
-			if [ $? != 0 ]; then
-				echo "${red}✘${reset} Local image build failed, exiting..."
-				exit 1
+		if [ "$NETWORK" == "local" ]; then
+			if [ ! "$(docker image ls -q -f reference=lisk-docker)" ]; then
+				echo "Building ${NAME} image, this can take a very long time..."
+				docker build --no-cache -f Dockerfile.local -t ${IMAGE} . &> /dev/null
+				if [ $? != 0 ]; then
+					echo "${red}✘${reset} Local image build failed, exiting..."
+					exit 1
+				fi
 			fi
 		fi
 		docker run -d --restart=always \
@@ -158,6 +157,10 @@ pgAdmin() {
 				if [ "$(docker ps -aq -f status=exited -f name=pgadmin)" ]; then
 					docker start pgadmin > /dev/null
 				else
+					if [ ! "$(docker image ls -q -f reference=pgadmin)" ]; then
+						echo "Building pgadmin image, this can take a very long time..."
+						docker build --no-cache -f Dockerfile.pgadmin -t pgadmin:latest . &> /dev/null
+					fi
 					PASS=$2
 					PGADMINPASS=$(< /dev/urandom LC_CTYPE=C tr -dc _A-Z-a-z-0-9 | head -c 10; echo)
 					docker run  -d --restart=always \
@@ -203,9 +206,7 @@ stop() {
 }
 
 upgrade() {
-	FORGINGWHITELISTIP=$2
-
-	if [ "$(docker ps -q -f name=${NAME})" ] || [ "$(docker ps -aq -f status=exited -f name=pgadmin)" ]; then
+	if [ "$(docker ps -q -f name=${NAME})" ] || [ "$(docker ps -aq -f status=exited -f name=${NAME})" ]; then
 
 		install $@ > /dev/null
 		if [ "$(docker ps -aq -f status=exited -f name=pgadmin)" ]; then pgAdmin start; fi
@@ -214,39 +215,43 @@ upgrade() {
 		then
 			stop ${NAME}
 		fi
-		if [ "$(docker ps -q -f name=${OTHER1})" ]
+		if [ "$(docker ps -q -f name=${OTHERNAME1})" ]
 		then
 			OTHER1FOUND=true
-			stop ${OTHER1}
+			stop ${OTHERNAME1}
 		fi
-		if [ "$(docker ps -q -f name=${OTHER2})" ]
+		if [ "$(docker ps -q -f name=${OTHERNAME2})" ]
 		then
 			OTHER2FOUND=true
-			stop ${OTHER2}
+			stop ${OTHERNAME2}
 		fi
 
 		if [ "$(docker ps -q -f name=pgadmin)" ]; then
 			PGADMINFOUND=true
 			PGADMINPASS=$(docker exec pgadmin sh -c 'echo "$PGADMIN_SETUP_PASSWORD"')
-			pgAdmin stop
-			if [ "$(docker ps -aq -f status=exited -f name=pgadmin)" ]; then docker rm pgadmin &> /dev/null; fi
-			docker pull ${PGADMINIMAGE}  > /dev/null
+			pgAdmin uninstall
+			docker rmi pgadmin > /dev/null
 		fi
 
 		if [ "$(docker ps -q -f name=redis)" ]; then docker stop redis &> /dev/null; fi
 		docker rm redis &> /dev/null
+		docker pull ${REDISIMAGE} > /dev/null
 
 		if [ "$(docker ps -q -f name=postgresql)" ]; then docker stop postgresql &> /dev/null; fi
 		docker rm postgresql &> /dev/null
+		docker pull ${POSTGRESIMAGE} > /dev/null
 
-		if [ "$NETWORK" == "local" ]; then
-			docker rm ${NAME} > /dev/null
+		docker rm ${NAME} &> /dev/null
+		if [ "$NETWORK" != "local" ]; then
+			docker pull ${IMAGE} &> /dev/null
+		else
 			docker rmi ${IMAGE} > /dev/null
-		fi 
+		fi
+
 		install $@
 
-		if [ ! -z "$OTHER1FOUND" ]; then start ${OTHER1}; fi
-		if [ ! -z "$OTHER2FOUND" ]; then start ${OTHER2}; fi
+		if [ ! -z "$OTHER1FOUND" ]; then start ${OTHERNAME1}; fi
+		if [ ! -z "$OTHER2FOUND" ]; then start ${OTHERNAME2}; fi
 		if [ ! -z "$PGADMINFOUND" ]; then pgAdmin start ${PGADMINPASS}> /dev/null; fi
 
 		docker volume rm $(docker volume ls -f dangling=true -q) &> /dev/null
@@ -260,10 +265,10 @@ uninstall() {
 	if [ "$(docker ps -q -f name=${NAME})" ]; then docker stop ${NAME} &> /dev/null; fi
 	if [ "$(docker ps -aq -f status=exited -f name=${NAME})" ]; then docker rm ${NAME} &> /dev/null; fi
 
-	if [ ! "$(docker ps -q -f name=${OTHER1})" ]; then
-		if [ ! "$(docker ps -aq -f status=exited -f name=${OTHER1})" ]; then
-			if [ ! "$(docker ps -q -f name=${OTHER2})" ]; then
-				if [ ! "$(docker ps -aq -f status=exited -f name=${OTHER2})" ]; then
+	if [ ! "$(docker ps -q -f name=${OTHERNAME1})" ]; then
+		if [ ! "$(docker ps -aq -f status=exited -f name=${OTHERNAME1})" ]; then
+			if [ ! "$(docker ps -q -f name=${OTHERNAME2})" ]; then
+				if [ ! "$(docker ps -aq -f status=exited -f name=${OTHERNAME2})" ]; then
 					if [ "$(docker ps -q -f name=pgadmin)" ]; then docker stop pgadmin &> /dev/null; fi
 					docker rm pgadmin &> /dev/null
 					if [ "$(docker ps -q -f name=postgresql)" ]; then docker stop postgresql &> /dev/null; fi
@@ -337,33 +342,39 @@ setupNetwork() {
 
 		REDISIMAGE=redis:4.0
 		POSTGRESIMAGE=postgres:9.6.5
-		PGADMINIMAGE=5an1ty/pgadmin4:latest
+		PGADMINIMAGE=pgadmin:latest
 
 		if [ "$NETWORK" == "main" ]
 		then
+			OTHERNETWORK1=test
+			OTHERNETWORK2=local
 			NAME=mainnet
+			OTHERNAME1=testnet
+			OTHERNAME2=localnet
 			DB=lisk_main
 			IMAGE=lisk/mainnet:latest
 			PORT=8000
-			OTHER1=testnet
-			OTHER2=localnet
 			REDISINSTANCE=0
 		elif [ "$NETWORK" == "test" ]
 		then
+			OTHERNETWORK1=main
+			OTHERNETWORK2=local
 			NAME=testnet
+			OTHERNAME1=mainnet
+			OTHERNAME2=localnet
 			DB=lisk_test
 			IMAGE=lisk/testnet:latest
 			PORT=7000
-			OTHER1=mainnet
-			OTHER2=localnet
 			REDISINSTANCE=1
 		else
+			OTHERNETWORK1=main
+			OTHERNETWORK2=test
 			NAME=localnet
+			OTHERNAME1=mainnet
+			OTHERNAME2=testnet
 			DB=lisk_local
 			IMAGE=lisk-docker:latest
 			PORT=4000
-			OTHER1=mainnet
-			OTHER2=testnet
 			REDISINSTANCE=2
 		fi
 
@@ -373,66 +384,70 @@ setupNetwork() {
 	fi
 }
 
-red=`tput setaf 1`
-green=`tput setaf 2`
-reset=`tput sgr0`
+run() {
+	red=`tput setaf 1`
+	green=`tput setaf 2`
+	reset=`tput sgr0`
 
-case "$1" in
-	install)
-		setupNetwork $@
-		echo "installing ${NAME}..."
-		install $NETWORK $3
-		;;
-	start)
-		setupNetwork $@
-		echo "starting ${NAME}..."
-		start $NAME
-		;;
-	stop)
-		setupNetwork $@
-		echo "stopping ${NAME}..."
-		stop $NAME
-		;;
-	uninstall)
-		setupNetwork $@
-		echo "uninstalling ${NAME}..."
-		uninstall $NETWORK
-		;;
-	upgrade)
-		setupNetwork $@
-		echo "upgrading ${NAME}..."
-		upgrade $NETWORK $3
-		;;
-	logs)
-		setupNetwork $@
-		shift
-		shift
-		logs $NETWORK $@
-		;;
-	reset)
-		setupNetwork $@
-		echo "resetting ${NAME}..."
-		reset $NETWORK $3
-		;;
-	ssh)
-		setupNetwork $@
-		echo "logging into ${NAME}..."
-		ssh $NETWORK
-		;;
-	status)
-		echo -e "status of lisk-docker..."
-		setupNetwork $@
-		status
-		;;
-	pgadmin)
-		echo "running pgadmin ${2}..."
-		setupNetwork
-		pgAdmin $2 $3
-		;;
-	version)
-		scriptinfo
-		;;
-	*)
-		usagefull
-		;;
-esac
+	case "$1" in
+		install)
+			setupNetwork $@
+			echo "installing ${NAME}..."
+			install $NETWORK $3
+			;;
+		start)
+			setupNetwork $@
+			echo "starting ${NAME}..."
+			start $NAME
+			;;
+		stop)
+			setupNetwork $@
+			echo "stopping ${NAME}..."
+			stop $NAME
+			;;
+		uninstall)
+			setupNetwork $@
+			echo "uninstalling ${NAME}..."
+			uninstall $NETWORK
+			;;
+		upgrade)
+			setupNetwork $@
+			echo "upgrading ${NAME}..."
+			upgrade $NETWORK $3
+			;;
+		logs)
+			setupNetwork $@
+			shift
+			shift
+			logs $NETWORK $@
+			;;
+		reset)
+			setupNetwork $@
+			echo "resetting ${NAME}..."
+			reset $NETWORK $3
+			;;
+		ssh)
+			setupNetwork $@
+			echo "logging into ${NAME}..."
+			ssh $NETWORK
+			;;
+		status)
+			echo -e "status of lisk-docker..."
+			setupNetwork $@
+			status
+			;;
+		pgadmin)
+			echo "running pgadmin ${2}..."
+			setupNetwork
+			pgAdmin $2 $3
+			;;
+		version)
+			scriptinfo
+			;;
+		*)
+			usagefull
+			;;
+	esac
+}
+
+run $@
