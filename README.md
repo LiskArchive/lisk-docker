@@ -87,8 +87,8 @@ Optionally allows launching a pgadmin container which enables management of the 
 In order to perform a Lisk-Docker installation, the following command should be run depending on the network:
 
 ```
-wget https://raw.githubusercontent.com/LiskHQ/lisk-docker/development/lisk-docker.sh
-chmod +x lisk-docker.sh
+git clone https://github.com/liskHQ/lisk-docker
+cd lisk-docker
 ./lisk-docker.sh install {local|test|main}
 ```
 

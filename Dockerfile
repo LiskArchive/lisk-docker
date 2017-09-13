@@ -46,6 +46,7 @@ RUN chmod +x install.sh
 
 # Install Lisk
 USER lisk
+RUN echo $CONTEXT > ./.NETWORK
 RUN ./install.sh $CONTEXT
 RUN rm install.sh
 
