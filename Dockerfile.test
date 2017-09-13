@@ -21,7 +21,6 @@ RUN apt-get update -y && DEBIAN_FRONTEND=noninteractive apt-get install -qy \
 # Add Lisk User
 RUN useradd lisk -s /bin/bash -m
 RUN echo "lisk:password" | chpasswd
-#RUN echo "%lisk ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 
 VOLUME ["/home/lisk/lisk"]
 
