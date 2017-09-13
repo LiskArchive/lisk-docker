@@ -1,5 +1,7 @@
 FROM python:3-alpine3.6
 
+MAINTAINER LiskHQ
+
 ENV PGADMIN4_VERSION 1.6
 
 # Metadata
