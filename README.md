@@ -38,7 +38,13 @@ docker login username
 #### 3. Build the image
 
 ```
-docker build -t username/lisk:latest -f Dockerfile.test .
+docker build -t username/lisk:latest -f Dockerfile.local .
+```
+
+If you wanted to build testnet and mainnet images you would have to change the target image to for example (test):
+
+```
+username/lisk-test:latest
 ```
 
 #### 4. Tag the image
@@ -59,7 +65,7 @@ docker push username/lisk
 docker run -d --restart=always \
 -p 4000:4000 \
 -e DATABASE_HOST=postgresql \
--e DATABASE_NAME=lisk_main \
+-e DATABASE_NAME=lisk_local \
 -e DATABASE_USER=lisk \
 -e DATABASE_PASSWORD=password \
 -e REDIS_ENABLED=true \
