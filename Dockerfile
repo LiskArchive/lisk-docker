@@ -1,17 +1,22 @@
 FROM node:6.11.3
+ARG CONTEXT
 MAINTAINER LiskHQ
-LABEL description="Lisk Docker Image - Testnet" version="1.4.2"
+LABEL description="Lisk Docker Image - ${CONTEXT}net" version="1.4.2"
 
 # Install Essentials
 WORKDIR /root
 RUN wget -q https://www.postgresql.org/media/keys/ACCC4CF8.asc -O - | apt-key add -
 RUN echo "deb http://apt.postgresql.org/pub/repos/apt/ jessie-pgdg main" >> /etc/apt/sources.list.d/pgdg.list
 RUN apt-get update -y && DEBIAN_FRONTEND=noninteractive apt-get install -qy \
+	autoconf \
+	automake \
+	build-essential \
 	curl \
 	git \
 	gzip \
 	libtool \
 	nano \
+	python \
 	wget \
 	tar \
 	jq \
@@ -24,25 +29,8 @@ RUN echo "lisk:password" | chpasswd
 
 VOLUME ["/home/lisk/lisk"]
 
-# Install Lisk
-USER lisk
-WORKDIR /home/lisk
-RUN wget https://downloads.lisk.io/lisk/test/lisk-source.tar.gz -O lisk-source.tar.gz
-RUN tar -zxvf lisk-source.tar.gz
-RUN mv -f lisk-source src
-RUN rm lisk-source.tar.gz
-WORKDIR src
-RUN npm install --production
-RUN sed -i 's/"public": false,/"public": true,/g' config.json
-
-# Install Lisk Node
-RUN wget https://downloads.lisk.io/lisk-node/lisk-node-Linux-x86_64.tar.gz -O lisk-node-Linux-x86_64.tar.gz
-RUN tar -zxvf lisk-node-Linux-x86_64.tar.gz
-RUN rm lisk-node-Linux-x86_64.tar.gz
-
 # Install Start Lisk
 WORKDIR /home/lisk
-USER root
 ADD scripts/setup.sh /home/lisk
 RUN chown lisk:lisk setup.sh
 RUN chmod ug+x setup.sh
@@ -52,11 +40,15 @@ RUN chmod ug+x entrypoint.sh
 ADD scripts/restore.sh /home/lisk
 RUN chown lisk:lisk restore.sh
 RUN chmod ug+x restore.sh
+ADD scripts/install.sh /home/lisk
+RUN chmod +x install.sh
 
-RUN npm install --global --production lisky
+# Install Lisk
+RUN ./install.sh $CONTEXT
+RUN rm install.sh
 
 ENV TOP=true
 ENV TERM=xterm
 
-EXPOSE 7000
-ENTRYPOINT ["./setup.sh", "test"]
+EXPOSE 8000
+ENTRYPOINT "./setup.sh"

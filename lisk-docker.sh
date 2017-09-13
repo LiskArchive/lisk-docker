@@ -109,7 +109,7 @@ install() {
 			if [ "$NETWORK" == "local" ]; then
 				if [ ! "$(docker image ls -q -f reference=lisk-docker)" ]; then
 					echo "Building ${NAME} image, this can take a very long time..."
-					docker build --no-cache -f Dockerfile.local -t ${IMAGE} . &> /dev/null
+					docker build --no-cache -f Dockerfile -t ${IMAGE} --build-arg CONTEXT=local . &> /dev/null
 					if [ $? != 0 ]; then
 						echo "${red}✘${reset} Local image build failed, exiting..."
 						exit 1
@@ -168,9 +168,8 @@ pgAdmin() {
 					PGADMINPASS=$(< /dev/urandom LC_CTYPE=C tr -dc _A-Z-a-z-0-9 | head -c 10; echo)
 					docker run  -d --restart=always \
 					-p 5050:5050 \
-					-e SERVER_MODE=true \
-					-e PGADMIN_SETUP_EMAIL=admin \
-					-e PGADMIN_SETUP_PASSWORD=${PASS:-$PGADMINPASS} \
+					-e DEFAULT_USER=admin \
+					-e DEFAULT_PASSWORD=${PASS:-$PGADMINPASS} \
 					-v /etc/localtime:/etc/localtime:ro \
 					--name pgadmin \
 					--net lisk \
