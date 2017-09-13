@@ -1,6 +1,6 @@
 # Lisk Docker
 
-**The official Lisk docker image.** This document details how to build your own version of the image. If all you want to do is install the official Lisk docker image, please read the following: https://github.com/LiskHQ/lisk-wiki/wiki/Docker-Install
+**The official Lisk docker image.** This document details how to build your own version of the image. If all you want to do is install the official Lisk docker image, please go to our public repository on Docker hub: https://hub.docker.com/u/lisk/
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](http://www.gnu.org/licenses/gpl-3.0)
 
@@ -30,7 +30,7 @@ sudo service docker restart
 #### 2. Log into Docker
 
 ```
-docker login username
+docker login {username}
 ```
 
 **NOTE:** If you don't have a docker account you can sign up [here](https://hub.docker.com/).
@@ -38,34 +38,22 @@ docker login username
 #### 3. Build the image
 
 ```
-docker build -t username/lisk:latest -f Dockerfile.local .
+docker build -t {image_name}:{tag} -f Dockerfile --build-arg CONTEXT={local|test|main} .
 ```
 
-If you wanted to build testnet and mainnet images you would have to change the target image to for example (test):
+#### 4. Push the image
 
 ```
-username/lisk-test:latest
+docker push {image_name}:{tag}
 ```
 
-#### 4. Tag the image
-
-```
-docker tag username/lisk:latest username/lisk:version
-```
-
-#### 5. Push the image
-
-```
-docker push username/lisk
-```
-
-#### 6. Run the image
+#### 5. Run the image
 
 ```
 docker run -d --restart=always \
--p 4000:4000 \
+-p {4000:4000|7000:7000|8000:8000} \
 -e DATABASE_HOST=postgresql \
--e DATABASE_NAME=lisk_local \
+-e DATABASE_NAME={lisk_local|lisk_test|lisk_main} \
 -e DATABASE_USER=lisk \
 -e DATABASE_PASSWORD=password \
 -e REDIS_ENABLED=true \
@@ -74,16 +62,16 @@ docker run -d --restart=always \
 -e REDIS_DB=0 \
 -e FORGING_WHITELIST_IP=127.0.0.1 \
 -e LOG_LEVEL=info \
---name localnet \
-username/lisk:version
+--name {localnet|testnet|mainnet} \
+{image_name}:{tag}
 ```
 
-For more details please read: https://github.com/LiskHQ/lisk-wiki/wiki/Docker-Install
+For more details please read: https://docs.lisk.io/docs/core-installation-docker-main
 
 #### 7. Archive the image
 
 ```
-docker save username/lisk > lisk-docker.tar
+docker save {image_name} > lisk-docker.tar
 gzip -9 lisk-docker.tar.gz
 ```
 
@@ -91,42 +79,35 @@ gzip -9 lisk-docker.tar.gz
 
 ## Using lisk-docker.sh
 
-#### 1. Starting a container with lisk-docker.sh
+This script provides easy management for all the essential components used by Lisk nodes. It helps to build several containers, installation process, start|stop nodes and uninstall them.
+Optionally allows launching a pgadmin container which enables management of the databases directly on the browser.
 
-In order to start a Lisk-Docker installation, the following command should be run depending on the network:
+#### 1. Install environment
 
-** Mainnet **
-```
-wget https://raw.githubusercontent.com/LiskHQ/lisk-docker/development/lisk-docker.sh
-chmod +x lisk-docker.sh
-./lisk-docker.sh start main
-```
-
-** Testnet **
+In order to perform a Lisk-Docker installation, the following command should be run depending on the network:
 
 ```
 wget https://raw.githubusercontent.com/LiskHQ/lisk-docker/development/lisk-docker.sh
 chmod +x lisk-docker.sh
-./lisk-docker.sh start test
+./lisk-docker.sh install {local|test|main}
 ```
 
-#### 2. Stopping a container with lisk-docker.sh
-
-** Mainnet **
-```
-./lisk-docker.sh stop main
-```
-
-** Testnet **
+#### 2. Starting environment
 
 ```
-./lisk-docker.sh stop test
+./lisk-docker.sh start {local|test|main}
 ```
 
-#### 3. lisk-docker.sh manual
+#### 3. Stopping environment
 
 ```
-┗ ./lisk-docker.sh
+./lisk-docker.sh stop {local|test|main}
+```
+
+#### 4. lisk-docker.sh help
+
+```
+./lisk-docker.sh
  SYNOPSIS
     lisk-docker.sh [command] args ...
 
@@ -134,7 +115,7 @@ chmod +x lisk-docker.sh
     Lisk Docker Utility Script
 
  OPTIONS
-    install [network] [forging ip]  Install All docker containers for a specific network
+    install [network] [forging ip]  Install docker containers for a specific network
                                     default network is main
                                     optional whitelist ip for forging
     start [network]                 Start the docker container for a specific network
@@ -165,8 +146,8 @@ chmod +x lisk-docker.sh
     pgadmin [command] [password]    Starts or stops pgadmin.
                                     valid options for command: start, stop, changepw, uninstall
                                     optional password to set for logging in
-    help                            Print this help
-    version                         Print script information
+    help                            Outputs utility help
+    version                         Outputs script version
 
  EXAMPLES
     lisk-docker.sh start main
@@ -178,11 +159,11 @@ chmod +x lisk-docker.sh
 
 ```
 
-## Using Docker Compose 
+## Using Docker Compose
 
 #### 1. Starting a container with Docker Compose
 
-In order to start a Lisk-Docker installation, the following command should be run depending on the network:
+In order to perform a Lisk-Docker installation, the following command should be run depending on the network:
 
 ** Mainnet **
 ```
@@ -191,7 +172,6 @@ docker-compose -f docker-compose-liskmain.yml up -d
 ```
 
 ** Testnet **
-
 ```
 wget https://raw.githubusercontent.com/LiskHQ/lisk-docker/development/docker-compose-lisktest.yml
 docker-compose -f docker-compose-lisktest.yml up -d
@@ -205,7 +185,6 @@ docker-compose -f docker-compose-liskmain.yml down
 ```
 
 ** Testnet **
-
 ```
 docker-compose -f docker-compose-lisktest.yml down
 ```
@@ -218,63 +197,28 @@ Edit the compose files and change the following to your ip:
 FORGING_WHITELIST_IP=172.0.0.1
 ```
 
-
-## Advanced
-
-This is an advanced section for users familiar with docker!
-
-#### 1. Running the node container and nothing else
-
-** Mainnet **
+### 4. Starting two environments (testnet and mainnet) at once
 
 ```
-docker run -d --restart=always \
--p 8000:8000 \
--e DATABASE_HOST=postgresql \
--e DATABASE_NAME=lisk_main \
--e DATABASE_USER=lisk \
--e DATABASE_PASSWORD=password \
--e REDIS_ENABLED=true \
--e REDIS_HOST=redis \
--e REDIS_PORT=6379 \
--e REDIS_DB=0 \
--e FORGING_WHITELIST_IP=127.0.0.1 \
--e LOG_LEVEL=info \
---name mainnet \
-lisk/mainnet:latest
-```
-
-** Testnet **
-
-```
-docker run -d --restart=always \
--p 7000:7000 \
--e DATABASE_HOST=postgresql \
--e DATABASE_NAME=lisk_main \
--e DATABASE_USER=lisk \
--e DATABASE_PASSWORD=password \
--e REDIS_ENABLED=true \
--e REDIS_HOST=redis \
--e REDIS_PORT=6379 \
--e REDIS_DB=0 \
--e FORGING_WHITELIST_IP=127.0.0.1 \
--e LOG_LEVEL=info \
---name testnet \
-lisk/testnet:latest
+wget https://raw.githubusercontent.com/LiskHQ/lisk-docker/development/docker-compose-liskcombo.yml
+docker-compose -f docker-compose-liskcombo.yml up -d
 ```
 
 ## Useful Commands
-
-#### Removing dangling images
-
-```
-docker rmi $(docker images -q -f "dangling=true")
-```
-
-#### Removing exited containers
+The next lines can be added on `~/.bash_aliases` to make Docker household easier:
 
 ```
-docker rm $(docker ps -q -f status=exited)
+# Kill all running containers.
+alias dockerkillall='docker kill $(docker ps -q)'
+
+# Delete all stopped containers.
+alias dockercleanc='printf "\n>>> Deleting stopped containers\n\n" && docker rm $(docker ps -a -q)'
+
+# Delete all untagged images.
+alias dockercleani='printf "\n>>> Deleting untagged images\n\n" && docker rmi $(docker images -q -f dangling=true)'
+
+# Delete all stopped containers and untagged images.
+alias dockerclean='dockercleanc || true && dockercleani'
 ```
 
 ***
@@ -285,6 +229,7 @@ docker rm $(docker ps -q -f status=exited)
 - Michael Schmoock <michael@schmoock.net>
 - Isabella Dell <isabella@lightcurve.io>
 - Ruben Callewaert <rubencallewaertdev@gmail.com>
+- Diego Garcia <diego@lightcurve.io>
 
 ## License
 
