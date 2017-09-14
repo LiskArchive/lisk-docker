@@ -1,6 +1,6 @@
 # Lisk Docker
 
-**The official Lisk docker image.** This document details how to build your own version of the image. If all you want to do is install the official Lisk docker image, please read the following: https://github.com/LiskHQ/lisk-wiki/wiki/Docker-Install
+**The official Lisk docker image.** This document details how to build your own version of the image. If all you want to do is install the official Lisk docker image, please go to our public repository on Docker hub: https://hub.docker.com/u/lisk/
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](http://www.gnu.org/licenses/gpl-3.0)
 
@@ -30,7 +30,7 @@ sudo service docker restart
 #### 2. Log into Docker
 
 ```
-docker login username
+docker login {username}
 ```
 
 **NOTE:** If you don't have a docker account you can sign up [here](https://hub.docker.com/).
@@ -38,120 +38,142 @@ docker login username
 #### 3. Build the image
 
 ```
-docker build -t username/lisk:latest -f Dockerfile.test .
+docker build -t {image_name}:{tag} -f Dockerfile --build-arg CONTEXT={local|test|main} .
 ```
 
-#### 4. Tag the image
+#### 4. Push the image
 
 ```
-docker tag username/lisk:latest username/lisk:version
+docker push {image_name}:{tag}
 ```
 
-#### 5. Push the image
+#### 5. Run the image
 
 ```
-docker push username/lisk
+docker run -d --restart=always \
+-p {4000:4000|7000:7000|8000:8000} \
+-e DATABASE_HOST=postgresql \
+-e DATABASE_NAME={lisk_local|lisk_test|lisk_main} \
+-e DATABASE_USER=lisk \
+-e DATABASE_PASSWORD=password \
+-e REDIS_ENABLED=true \
+-e REDIS_HOST=redis \
+-e REDIS_PORT=6379 \
+-e REDIS_DB=0 \
+-e FORGING_WHITELIST_IP=127.0.0.1 \
+-e LOG_LEVEL=info \
+--name {localnet|testnet|mainnet} \
+{image_name}:{tag}
 ```
 
-#### 6. Run the image
-
-```
-docker run -d --restart=always -p 0.0.0.0:7000:7000 username/lisk
-```
-
-For more details please read: https://github.com/LiskHQ/lisk-wiki/wiki/Docker-Install
+For more details please read: https://docs.lisk.io/docs/core-installation-docker-main
 
 #### 7. Archive the image
 
 ```
-docker save username/lisk > lisk-docker.tar
+docker save {image_name} > lisk-docker.tar
 gzip -9 lisk-docker.tar.gz
 ```
 
 ***
 
-## Using Docker Compose 
+## Using lisk-docker.sh
 
-#### 1. Starting a container with Docker Compose
+This script provides easy management for all the essential components used by Lisk nodes. It helps to build several containers, installation process, start|stop nodes and uninstall them.
+Optionally allows launching a pgadmin container which enables management of the databases directly on the browser.
 
-In order to start a Lisk-Docker installation, the following command should be run depending on the network:
+#### 1. Install environment
 
-** Mainnet **
-```
-wget https://raw.githubusercontent.com/LiskHQ/lisk-docker/development/docker-compose-liskmain.yml
-docker-compose -f docker-compose-liskmain.yml up -d
-```
-
-** Testnet **
+In order to perform a Lisk-Docker installation, the following command should be run depending on the network:
 
 ```
-wget https://raw.githubusercontent.com/LiskHQ/lisk-docker/development/docker-compose-lisktest.yml
-docker-compose -f docker-compose-lisktest.yml up -d
+git clone https://github.com/liskHQ/lisk-docker
+cd lisk-docker
+./lisk-docker.sh install {local|test|main}
 ```
 
-#### 2. Stopping a container with Docker Compose
-
-** Mainnet **
-```
-docker-compose -f docker-compose-liskmain.yml down
-```
-
-** Testnet **
+#### 2. Starting environment
 
 ```
-docker-compose -f docker-compose-lisktest.yml down
+./lisk-docker.sh start {local|test|main}
 ```
 
-
-#### 3. Using an external postgresql database
-
-Passing the following environment variables to the container using `-e VARX=VALX` will allow you to connect to an external postgresql server or container:
-
-- DATABASE_HOST
-- DATABASE_PORT
-- DATABASE_NAME
-- DATABASE_USER
-- DATABASE_PASSWORD
-
-#### 4. Docker Compose File Usage
-
-Example:
+#### 3. Stopping environment
 
 ```
-version: '3'
-services:
-  lisk-node:
-    restart: always
-    image: lisk/mainnet:latest
-    ports:
-      - "8000:8000"
-    environment:
-      - DATABASE_HOST=postgresql
-      - DATABASE_NAME=lisk_main
-      - DATABASE_USER=lisk_main
-      - DATABASE_PASSWORD=password
-    links:
-      - PostgreSQL:postgresql
-  PostgreSQL:
-    restart: always
-    image: postgres:9.6.3
-    environment:
-      - POSTGRES_USER=lisk_main
-      - POSTGRES_PASSWORD=password
+./lisk-docker.sh stop {local|test|main}
+```
+
+#### 4. lisk-docker.sh help
+
+```
+./lisk-docker.sh
+ SYNOPSIS
+    lisk-docker.sh [command] args ...
+
+ DESCRIPTION
+    Lisk Docker Utility Script
+
+ OPTIONS
+    install [network] [forging ip]  Install docker containers for a specific network
+                                    default network is main
+                                    optional whitelist ip for forging
+    start [network]                 Start the docker container for a specific network
+                                    default network is main
+    stop [network]                  Stop the docker container for a specific network
+                                    default network is main
+    forge [network] [ip]            Enable forging for a specified network
+                                    default network is main
+                                    ip that is allowed to enable forging
+    uninstall [network]             uninstall all docker containers for a specific network
+                                    default network is main
+    upgrade [network]               upgrade all docker containers for a specific network
+                                    default network is main
+    logs [network] [args ...]       get logs for a specific network
+                                    default network is main
+                                    optional args:
+                                    --details (Show extra details provided to logs)
+                                    --follow, -f (Follow log output)
+                                    --since (logs since timestamp e.g. 2013-01-02T13:23:37 or relative e.g. 42m)
+                                    --tail (Number of lines to show from the end of the logs)
+                                    --timestamps, -t (Show timestamps)
+    reset [network] [url]           Reset the database and start syncing blocks again.
+                                    default network is main
+                                    Optianal snapshot url, default is from LiskHQ
+    ssh [network]                   Log in to the container for a specific network
+                                    default network is main
+    status                          Prints the status of lisk-docker.
+    pgadmin [command] [password]    Starts or stops pgadmin.
+                                    valid options for command: start, stop, changepw, uninstall
+                                    optional password to set for logging in
+    help                            Outputs utility help
+    version                         Outputs script version
+
+ EXAMPLES
+    lisk-docker.sh start main
+
+ IMPLEMENTATION
+    version         lisk-docker.sh 0.0.1
+    author          Ruben Callewaert (https://github.com/5an1ty/)
+    license         GNU General Public License v3.0
+
 ```
 
 ## Useful Commands
-
-#### Removing dangling images
-
-```
-docker rmi $(docker images -q -f "dangling=true")
-```
-
-#### Removing exited containers
+The next lines can be added on `~/.bash_aliases` to make Docker household easier:
 
 ```
-docker rm $(docker ps -q -f status=exited)
+# Kill all running containers.
+alias dockerkillall='docker kill $(docker ps -q)'
+
+# Delete all stopped containers.
+alias dockercleanc='printf "\n>>> Deleting stopped containers\n\n" && docker rm $(docker ps -a -q)'
+
+# Delete all untagged images.
+alias dockercleani='printf "\n>>> Deleting untagged images\n\n" && docker rmi $(docker images -q -f dangling=true)'
+
+# Delete all stopped containers and untagged images.
+alias dockerclean='dockercleanc || true && dockercleani'
 ```
 
 ***
@@ -162,6 +184,7 @@ docker rm $(docker ps -q -f status=exited)
 - Michael Schmoock <michael@schmoock.net>
 - Isabella Dell <isabella@lightcurve.io>
 - Ruben Callewaert <rubencallewaertdev@gmail.com>
+- Diego Garcia <diego@lightcurve.io>
 
 ## License
 
