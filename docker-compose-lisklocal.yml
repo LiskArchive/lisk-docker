@@ -2,7 +2,7 @@ version: '3'
 services:
   lisk-node:
     restart: always
-    image: lisk-docker:latest
+    image: lisk-local:latest
     ports:
       - "4000:4000"
     environment:

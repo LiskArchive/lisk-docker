@@ -107,7 +107,7 @@ install() {
 			docker start ${NAME} &> /dev/null
 		else
 			if [ "$NETWORK" == "local" ]; then
-				if [ ! "$(docker image ls -q -f reference=lisk-docker)" ]; then
+				if [ ! "$(docker image ls -q -f reference=lisk-local)" ]; then
 					echo "Building ${NAME} image, this can take a very long time..."
 					docker build --no-cache -f Dockerfile -t ${IMAGE} --build-arg CONTEXT=local . &> /dev/null
 					if [ $? != 0 ]; then
