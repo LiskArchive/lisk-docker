@@ -159,51 +159,6 @@ cd lisk-docker
 
 ```
 
-## Using Docker Compose
-
-#### 1. Starting a container with Docker Compose
-
-In order to perform a Lisk-Docker installation, the following command should be run depending on the network:
-
-** Mainnet **
-```
-wget https://raw.githubusercontent.com/LiskHQ/lisk-docker/development/docker-compose-liskmain.yml
-docker-compose -f docker-compose-liskmain.yml up -d
-```
-
-** Testnet **
-```
-wget https://raw.githubusercontent.com/LiskHQ/lisk-docker/development/docker-compose-lisktest.yml
-docker-compose -f docker-compose-lisktest.yml up -d
-```
-
-#### 2. Stopping a container with Docker Compose
-
-** Mainnet **
-```
-docker-compose -f docker-compose-liskmain.yml down
-```
-
-** Testnet **
-```
-docker-compose -f docker-compose-lisktest.yml down
-```
-
-### 3. Enable forging using docker compose
-
-Edit the compose files and change the following to your ip:
-
-```
-FORGING_WHITELIST_IP=172.0.0.1
-```
-
-### 4. Starting two environments (testnet and mainnet) at once
-
-```
-wget https://raw.githubusercontent.com/LiskHQ/lisk-docker/development/docker-compose-liskcombo.yml
-docker-compose -f docker-compose-liskcombo.yml up -d
-```
-
 ## Useful Commands
 The next lines can be added on `~/.bash_aliases` to make Docker household easier:
 
