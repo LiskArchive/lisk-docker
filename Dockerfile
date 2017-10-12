@@ -1,13 +1,17 @@
-FROM node:6.11.3
-ARG CONTEXT
-MAINTAINER LiskHQ
-LABEL description="Lisk Docker Image - ${CONTEXT}net" version="1.4.2"
+FROM node:6
+MAINTAINER support@lisk.io
+
+ARG network=test
+ARG version=1.4.2
+
+LABEL name="Lisk ${network}net" description="Lisk Docker Image - ${network}net" version="${version}"
 
 # Install Essentials
 WORKDIR /root
 RUN wget -q https://www.postgresql.org/media/keys/ACCC4CF8.asc -O - | apt-key add -
 RUN echo "deb http://apt.postgresql.org/pub/repos/apt/ jessie-pgdg main" >> /etc/apt/sources.list.d/pgdg.list
-RUN apt-get update -y && DEBIAN_FRONTEND=noninteractive apt-get install -qy \
+RUN apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install --assume-yes --no-install-recommends \
 	autoconf \
 	automake \
 	build-essential \
@@ -21,7 +25,9 @@ RUN apt-get update -y && DEBIAN_FRONTEND=noninteractive apt-get install -qy \
 	tar \
 	jq \
 	sudo \
-	postgresql-client-9.6
+	postgresql-client-9.6 && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 # Add Lisk User
 RUN useradd lisk -s /bin/bash -m
@@ -32,25 +38,20 @@ VOLUME ["/home/lisk/lisk"]
 
 # Install Start Lisk
 WORKDIR /home/lisk
-ADD scripts/setup.sh /home/lisk
-RUN chown lisk:lisk setup.sh
-RUN chmod ug+x setup.sh
-ADD scripts/entrypoint.sh /home/lisk
-RUN chown lisk:lisk entrypoint.sh
-RUN chmod ug+x entrypoint.sh
-ADD scripts/restore.sh /home/lisk
-RUN chown lisk:lisk restore.sh
-RUN chmod ug+x restore.sh
-ADD scripts/install.sh /home/lisk
-RUN chmod +x install.sh
+COPY scripts/ /home/lisk/
+RUN chown lisk:lisk -R /home/lisk
 
 # Install Lisk
 USER lisk
-RUN echo $CONTEXT > ./.NETWORK
-RUN ./install.sh $CONTEXT
+RUN echo ${network} > ./.NETWORK
+RUN ./install.sh ${network}
 RUN rm install.sh
+
+USER root
+RUN rm -rf /tmp/*
+USER lisk
 
 ENV TOP=true
 ENV TERM=xterm
 
-ENTRYPOINT "./setup.sh"
+CMD ["./setup.sh"]
