@@ -12,20 +12,18 @@ RUN wget -q https://www.postgresql.org/media/keys/ACCC4CF8.asc -O - | apt-key ad
 RUN echo "deb http://apt.postgresql.org/pub/repos/apt/ jessie-pgdg main" >> /etc/apt/sources.list.d/pgdg.list
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install --assume-yes --no-install-recommends \
-	autoconf \
-	automake \
-	build-essential \
-	curl \
-	git \
-	gzip \
-	libtool \
-	nano \
-	python \
-	wget \
-	tar \
-	jq \
-	sudo \
-	postgresql-client-9.6 && \
+        autoconf \
+        automake \
+        build-essential \
+        curl \
+        git \
+        gzip \
+        jq \
+        libtool \
+        postgresql-client-9.6 \
+        python \
+        sudo \
+        tar && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
