@@ -146,13 +146,13 @@ pgAdmin() {
 			echo "${green}✔${reset} pgadmin stopped successfully"
 			;;
 		changepw)
-      pgAdmin uninstall
+			pgAdmin uninstall
 			pgAdmin install $2
 			;;
 		uninstall) 
 			if [ "$(docker ps -q -f name=pgadmin)" ]; then docker stop pgadmin > /dev/null ; fi
 			if [ "$(docker ps -aq -f status=exited -f name=pgadmin)" ]; then docker rm pgadmin > /dev/null ; fi
-      if [ "$(docker image ls -q -f reference=pgadmin)" ]; then docker rmi pgadmin > /dev/null ; fi
+			if [ "$(docker image ls -q -f reference=pgadmin)" ]; then docker rmi pgadmin > /dev/null ; fi
 			echo "${green}✔${reset} pgadmin uninstalled successfully"
 			;;
 		install)
@@ -190,18 +190,18 @@ pgAdmin() {
 			fi
 			echo "${green}✔${reset} pgadim installed successfully"
 			;;
-    *)
-      if [ "$(docker ps -aq -f status=exited -f name=pgadmin)" ]; then
-        if [ ! -z "$2" ]; then
-          pgAdmin changepw $2
-        else
-				  docker start pgadmin > /dev/null
-        fi
+		*)
+			if [ "$(docker ps -aq -f status=exited -f name=pgadmin)" ]; then
+				if [ ! -z "$2" ]; then
+					pgAdmin changepw $2
+				else
+					docker start pgadmin > /dev/null
+				fi
 			else
-        pgAdmin install $2
-      fi
-      echo "${green}✔${reset} pgadim started successfully"
-      ;;
+				pgAdmin install $2
+			fi
+			echo "${green}✔${reset} pgadim started successfully"
+			;;
 	esac
 }
 

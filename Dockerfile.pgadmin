@@ -6,10 +6,10 @@ ENV PGADMIN4_VERSION 2.0
 
 # Metadata
 LABEL org.label-schema.name="pgAdmin4" \
-      org.label-schema.version="$PGADMIN4_VERSION" \
-      org.label-schema.license="PostgreSQL" \
-      org.label-schema.url="https://www.pgadmin.org" \
-      org.label-schema.vcs-url="https://github.com/LiskHQ/lisk-docker"
+			org.label-schema.version="$PGADMIN4_VERSION" \
+			org.label-schema.license="PostgreSQL" \
+			org.label-schema.url="https://www.pgadmin.org" \
+			org.label-schema.vcs-url="https://github.com/LiskHQ/lisk-docker"
 
 RUN set -ex \
 	&& apk add --no-cache --virtual .run-deps \
@@ -22,7 +22,7 @@ RUN set -ex \
 		openssl \
 		postgresql-dev \
 	&& pip --no-cache-dir install \
-		https://ftp.postgresql.org/pub/pgadmin/pgadmin4/v2.0/pip/pgadmin4-2.0-py2.py3-none-any.whl \
+		https://ftp.postgresql.org/pub/pgadmin/pgadmin4/v$PGADMIN4_VERSION/pip/pgadmin4-$PGADMIN4_VERSION-py2.py3-none-any.whl \
 	&& apk del .build-deps
 
 VOLUME /var/lib/pgadmin4
