@@ -28,7 +28,7 @@ if  [ $1 == "local" ]; then
 else
 
   echo $1 > ./NETWORK
-  wget https://downloads.lisk.io/lisk/$1/lisk-source.tar.gz -O lisk-source.tar.gz
+  wget -nv https://downloads.lisk.io/lisk/$1/lisk-source.tar.gz -O lisk-source.tar.gz
   tar -zxvf lisk-source.tar.gz
   mv -f lisk-source src
   rm lisk-source.tar.gz
@@ -39,7 +39,7 @@ else
 fi
 
 # Install Lisk Node
-wget https://downloads.lisk.io/lisk-node/lisk-node-Linux-x86_64.tar.gz -O lisk-node-Linux-x86_64.tar.gz
+wget -nv https://downloads.lisk.io/lisk-node/lisk-node-Linux-x86_64.tar.gz -O lisk-node-Linux-x86_64.tar.gz
 tar -zxvf lisk-node-Linux-x86_64.tar.gz
 rm lisk-node-Linux-x86_64.tar.gz
 
@@ -58,5 +58,3 @@ else
   sudo npm install --global --production lisky
   sudo sed '$d' /etc/sudoers
 fi
-
-cd /home/lisk
