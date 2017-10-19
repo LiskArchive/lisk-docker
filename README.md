@@ -43,6 +43,7 @@ make testnet
 - Isabella Dell <isabella@lightcurve.io>
 - Ruben Callewaert <rubencallewaertdev@gmail.com>
 - Diego Garcia <diego@lightcurve.io>
+- François Chavant <francois@lightcurve.io>
 
 ## License
 
