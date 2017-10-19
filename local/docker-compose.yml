@@ -1,0 +1,45 @@
+version: "3"
+services:
+
+  lisk:
+    image: lisk/local:latest
+    ports:
+      - "4000:4000"
+    networks:
+      - lisk-local
+    depends_on:
+      - db
+      - redis
+    restart: on-failure
+    env_file:
+      - db.env
+    environment:
+      - REDIS_ENABLED=true
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - FORGING_WHITELIST_IP=127.0.0.1
+
+  db:
+    image: postgres:9.6
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    networks:
+      - lisk-local
+    restart: on-failure
+    environment:
+      - POSTGRES_USER=lisk
+      - POSTGRES_PASSWORD=password
+
+  redis:
+    image: redis
+    ports:
+      - "6379"
+    networks:
+      - lisk-local
+    restart: on-failure
+
+networks:
+  lisk-local:
+
+volumes:
+  db-data:
