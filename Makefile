@@ -1,4 +1,4 @@
-.PHONY: help image-mainnet image-testnet mainnet testnet
+.PHONY: help image-mainnet image-testnet images mainnet testnet
 help:
 	@echo Usage:
 	@echo '  make <mainnet|testnet|local>'
@@ -11,6 +11,8 @@ image-testnet:
 
 image-mainnet: 
 	make -C images mainnet
+
+images: image-local image-testnet image-mainnet
 
 local: image-local
 	make -C local
