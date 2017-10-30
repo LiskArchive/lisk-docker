@@ -6,15 +6,21 @@
 
 ***
 
-## Build Instructions
+## Prerequisites
 
-#### 1. Install Docker
+### Install Docker
 
 Please refer to the [official Docker documentation](https://docs.docker.com/engine/installation)
 
-#### 3. Build the images
+### Install make
 
-Make sure `make` is installed on your system, decide which image you want to build and run:
+Install `make` on your system.
+
+## Build Instructions
+
+### Build the images
+
+Decide which image you want to build and run:
 
 `make -C images <local|mainnet|testnet>`
 
@@ -24,7 +30,7 @@ E.g. to build test testnet image:
 make -C images testnet
 ```
 
-#### 3. Run the image
+### Run the images
 
 `make <local|mainnet|testnet>`
 
