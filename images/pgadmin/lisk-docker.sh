@@ -38,7 +38,7 @@
 #%                                    default network is main
 #%    status                          Prints the status of lisk-docker.
 #%    pgadmin [command] [password]    Starts or stops pgadmin.
-#%                                    valid options for command: start, stop, changepw, uninstall
+#%                                    valid options for command: install, start, stop, changepw, uninstall
 #%                                    optional password to set for logging in
 #%    help                            Print this help
 #%    version                         Print script information
@@ -146,16 +146,16 @@ pgAdmin() {
 			echo "${green}✔${reset} pgadmin stopped successfully"
 			;;
 		changepw)
-			if [ "$(docker ps -q -f name=pgadmin)" ]; then docker stop pgadmin > /dev/null ; fi
-			if [ "$(docker ps -aq -f status=exited -f name=pgadmin)" ]; then docker rm pgadmin > /dev/null ; fi
-			pgAdmin start $2
+			pgAdmin uninstall
+			pgAdmin install $2
 			;;
 		uninstall) 
 			if [ "$(docker ps -q -f name=pgadmin)" ]; then docker stop pgadmin > /dev/null ; fi
 			if [ "$(docker ps -aq -f status=exited -f name=pgadmin)" ]; then docker rm pgadmin > /dev/null ; fi
+			if [ "$(docker image ls -q -f reference=pgadmin)" ]; then docker rmi pgadmin > /dev/null ; fi
 			echo "${green}✔${reset} pgadmin uninstalled successfully"
 			;;
-		*)
+		install)
 			if [ ! "$(docker ps -q -f name=pgadmin)" ]; then
 				if [ "$(docker ps -aq -f status=exited -f name=pgadmin)" ]; then
 					docker start pgadmin > /dev/null
@@ -187,6 +187,18 @@ pgAdmin() {
 					echo "- user: lisk"
 					echo "- password: password"
 				fi
+			fi
+			echo "${green}✔${reset} pgadim installed successfully"
+			;;
+		*)
+			if [ "$(docker ps -aq -f status=exited -f name=pgadmin)" ]; then
+				if [ ! -z "$2" ]; then
+					pgAdmin changepw $2
+				else
+					docker start pgadmin > /dev/null
+				fi
+			else
+				pgAdmin install $2
 			fi
 			echo "${green}✔${reset} pgadim started successfully"
 			;;

@@ -32,7 +32,55 @@ make -C images testnet
 
 ### Run the images
 
-`make <local|mainnet|testnet>`
+./lisk-docker.sh
+ SYNOPSIS
+    lisk-docker.sh [command] args ...
+
+ DESCRIPTION
+    Lisk Docker Utility Script
+
+ OPTIONS
+    install [network] [forging ip]  Install docker containers for a specific network
+                                    default network is main
+                                    optional whitelist ip for forging
+    start [network]                 Start the docker container for a specific network
+                                    default network is main
+    stop [network]                  Stop the docker container for a specific network
+                                    default network is main
+    forge [network] [ip]            Enable forging for a specified network
+                                    default network is main
+                                    ip that is allowed to enable forging
+    uninstall [network]             uninstall all docker containers for a specific network
+                                    default network is main
+    upgrade [network]               upgrade all docker containers for a specific network
+                                    default network is main
+    logs [network] [args ...]       get logs for a specific network
+                                    default network is main
+                                    optional args:
+                                    --details (Show extra details provided to logs)
+                                    --follow, -f (Follow log output)
+                                    --since (logs since timestamp e.g. 2013-01-02T13:23:37 or relative e.g. 42m)
+                                    --tail (Number of lines to show from the end of the logs)
+                                    --timestamps, -t (Show timestamps)
+    reset [network] [url]           Reset the database and start syncing blocks again.
+                                    default network is main
+                                    Optianal snapshot url, default is from LiskHQ
+    ssh [network]                   Log in to the container for a specific network
+                                    default network is main
+    status                          Prints the status of lisk-docker.
+    pgadmin [command] [password]    Starts or stops pgadmin.
+                                    valid options for command: install, start, stop, changepw, uninstall
+                                    optional password to set for logging in
+    help                            Outputs utility help
+    version                         Outputs script version
+
+ EXAMPLES
+    lisk-docker.sh start main
+
+ IMPLEMENTATION
+    version         lisk-docker.sh 0.0.1
+    author          Ruben Callewaert (https://github.com/5an1ty/)
+    license         GNU General Public License v3.0
 
 E.g. to run a testnet image:
 
