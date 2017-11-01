@@ -144,7 +144,7 @@ cd lisk-docker
                                     default network is main
     status                          Prints the status of lisk-docker.
     pgadmin [command] [password]    Starts or stops pgadmin.
-                                    valid options for command: start, stop, changepw, uninstall
+                                    valid options for command: install, start, stop, changepw, uninstall
                                     optional password to set for logging in
     help                            Outputs utility help
     version                         Outputs script version
