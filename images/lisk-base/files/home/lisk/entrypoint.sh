@@ -19,14 +19,13 @@ then
 fi
 
 DATABASE_PASSWORD=$( head -n1 ~/.pgpass |cut -d ":" -f 5 )
-RESOLVED_REDIS_HOST=$( getent hosts "${REDIS_HOST:=127.0.0.1}" | awk '{ print $1 }' )
 
 jq_config ".db.host = \"${PGHOST:=localhost}\""
 jq_config ".db.port = ${PGPORT:=5432}"
 jq_config ".db.database = \"${PGDATABASE:=$DB_NAME}\""
 jq_config ".db.user = \"${PGUSER}\""
 jq_config ".db.password = \"${DATABASE_PASSWORD:=password}\""
-jq_config ".redis.host = \"${RESOLVED_REDIS_HOST:=localhost}\""
+jq_config ".redis.host = \"${REDIS_HOST:=localhost}\""
 jq_config ".redis.port = ${REDIS_PORT:=6380}"
 jq_config ".redis.db = ${REDIS_DB:=0}"
 jq_config ".cacheEnabled = ${REDIS_ENABLED:=false}"
