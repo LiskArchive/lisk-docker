@@ -11,5 +11,19 @@ pipeline {
 				sh 'make images'
 			}
 		}
+		stage('smoke tests') {
+			steps {
+				ansiColor('xterm') {
+					sh 'make testnet'
+				}
+			}
+		}
+	}
+	post {
+	    always {
+		ansiColor('xterm') {
+			sh 'make -C testnet mrproper'
+		}
+	    }
 	}
 }
