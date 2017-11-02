@@ -21,7 +21,7 @@ mrproper: down clean
 
 restore: blockchain.db.gz
 	docker run --rm --interactive --network=mainnet_lisk-main --env-file db.env lisk/mainnet --volume $(shell pwd)/.pgpass:/home/lisk/.pgpass psql -w --dbname=lisk --command="\d ready" >/dev/null 2>&1 || sleep 10
-	docker run --rm --interactive --tty --network=mainnet_lisk-main --env-file db.env --volume $(shell pwd)/.pgpass:/home/lisk/.pgpass lisk/mainnet createdb -w lisk_main
+	docker run --rm --interactive --network=mainnet_lisk-main --env-file db.env --volume $(shell pwd)/.pgpass:/home/lisk/.pgpass lisk/mainnet createdb -w lisk_main
 	gzip --decompress --to-stdout blockchain.db.gz |docker run --rm --interactive --network=mainnet_lisk-main --env-file db.env --volume $(shell pwd)/.pgpass:/home/lisk/.pgpass lisk/mainnet psql -w
 	docker run --rm --interactive --network=mainnet_lisk-main --env-file db.env --volume $(shell pwd)/.pgpass:/home/lisk/.pgpass lisk/mainnet psql -w --dbname=lisk --command="create table ready(id int);"
 	touch restore
