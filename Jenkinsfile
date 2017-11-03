@@ -15,6 +15,11 @@ pipeline {
 			steps {
 				ansiColor('xterm') {
 					sh 'make testnet'
+					dir('testnet') {
+						docker-compose logs redis |grep --quiet 'Ready to accept connections'
+						docker-compose logs db |grep --quiet 'PostgreSQL init process complete; ready for start up.'
+						docker-compose logs lisk |grep --quiet 'Database is ready.'
+					}
 				}
 			}
 		}
