@@ -3,6 +3,8 @@ services:
 
   lisk:
     image: lisk/local:latest
+    volumes:
+      - ./.pgpass:/home/lisk/.pgpass
     ports:
       - "4000:4000"
     networks:

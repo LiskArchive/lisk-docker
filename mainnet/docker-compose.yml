@@ -3,6 +3,8 @@ services:
 
   lisk:
     image: lisk/mainnet:latest
+    volumes:
+      - ./.pgpass:/home/lisk/.pgpass
     ports:
       - "8000:8000"
     networks:
