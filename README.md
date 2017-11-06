@@ -8,9 +8,11 @@
 
 ## Prerequisites
 
-### Install Docker
+### Install the Docker Engine and Docker Compose
 
-Please refer to the [official Docker documentation](https://docs.docker.com/engine/installation)
+Please refer to the official documentation for
+ - [Docker Engine](https://docs.docker.com/engine/installation) and
+ - [Docker Compose](https://docs.docker.com/compose/install/)
 
 ### Install make
 
