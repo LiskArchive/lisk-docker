@@ -42,6 +42,15 @@ E.g. to run a testnet image:
 make testnet
 ```
 
+#### pgAdmin
+
+If you wish you can start pgAdmin by running `make pgadmin` in one of the subdirectories, e.g.:
+
+```
+cd testnet
+make pgadmin
+```
+
 ***
 
 ## Authors
