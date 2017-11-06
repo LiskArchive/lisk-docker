@@ -25,6 +25,7 @@ restore: blockchain.db.gz
 	touch restore
 
 testnet: up restore
+	@echo All done; try the following: 'cd testnet; docker-compose ps'
 
 up: .pgpass
 	docker-compose up -d

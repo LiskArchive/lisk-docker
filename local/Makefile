@@ -12,6 +12,7 @@ down:
 	rm -f restore
 
 local: up restore
+	@echo All done; try the following: 'cd local; docker-compose ps'
 
 mrproper: down clean
 

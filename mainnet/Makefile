@@ -12,6 +12,7 @@ down:
 	rm -f restore
 
 mainnet: up restore
+	@echo All done; try the following: 'cd mainnet; docker-compose ps'
 
 mrproper: down clean
 
