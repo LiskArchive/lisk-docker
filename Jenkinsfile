@@ -18,7 +18,10 @@ pipeline {
 					dir('testnet') {
 						sh 'docker-compose logs redis |grep --quiet "Ready to accept connections"'
 						sh 'docker-compose logs db |grep --quiet "PostgreSQL init process complete; ready for start up."'
-						sh 'docker-compose logs lisk |grep --quiet "Database is ready."'
+						retry(3) {
+							sleep 30
+							sh 'docker-compose logs lisk |grep --quiet "Database is ready."'
+						}
 					}
 				}
 			}
