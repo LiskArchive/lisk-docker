@@ -22,7 +22,9 @@ force-restore: drop-database restore
 	docker-compose start lisk
 
 mainnet: up restore
-	@echo All done; try the following: 'cd mainnet; docker-compose ps'
+	@echo
+	@echo "All done; try the following:"
+	@echo "> cd mainnet; docker-compose ps"
 
 mrproper: down clean
 

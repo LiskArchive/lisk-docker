@@ -22,7 +22,9 @@ force-restore: drop-database restore
 	docker-compose start lisk
 
 local: up restore
-	@echo All done; try the following: 'cd local; docker-compose ps'
+	@echo
+	@echo "All done; try the following:"
+	@echo "> cd local; docker-compose ps"
 
 mrproper: down clean
 
