@@ -12,10 +12,10 @@ down:
 	docker-compose down --volumes
 	rm -f restore
 
-drop-database:
+drop-database: up
 	docker-compose stop lisk
-	docker run --rm --interactive --network=testnet_lisk-test --env-file db.env --volume $(shell pwd)/.pgpass:/home/lisk/.pgpass lisk/testnet psql -w --dbname=lisk --command="drop table ready;"
-	docker run --rm --interactive --network=testnet_lisk-test --env-file db.env --volume $(shell pwd)/.pgpass:/home/lisk/.pgpass lisk/testnet dropdb -w lisk_test
+	docker run --rm --interactive --network=testnet_lisk-test --env-file db.env --volume $(shell pwd)/.pgpass:/home/lisk/.pgpass lisk/testnet psql -w --dbname=postgres --command="DROP DATABASE IF EXISTS lisk_test;"
+	docker run --rm --interactive --network=testnet_lisk-test --env-file db.env --volume $(shell pwd)/.pgpass:/home/lisk/.pgpass lisk/testnet createdb -w lisk_restoring || true
 	rm -f restore
 
 force-restore: drop-database restore
@@ -33,15 +33,14 @@ pgadmin:
 	@echo
 	@echo "pgAdmin is running at http://localhost:5070/"
 	@echo "Click 'Add New Server' and use the following information:"
-	@echo "  Hostname: db"
-	@echo "  Username: lisk"
-	@echo "  Password: password"
+	@echo "  Hostname: $(shell grep PGHOST db.env |cut -d "=" -f 2 )"
+	@echo "  Username: $(shell grep PGUSER db.env |cut -d "=" -f 2 )"
+	@echo "  Password: $(shell grep POSTGRES_PASSWORD db.env |cut -d "=" -f 2 )"
 
 restore: blockchain.db.gz
-	docker run --rm --interactive --network=testnet_lisk-test --env-file db.env lisk/testnet --volume $(shell pwd)/.pgpass:/home/lisk/.pgpass psql -w --dbname=lisk --command="\d ready" >/dev/null 2>&1 || sleep 10
-	docker run --rm --interactive --network=testnet_lisk-test --env-file db.env --volume $(shell pwd)/.pgpass:/home/lisk/.pgpass lisk/testnet createdb -w lisk_test
-	gzip --decompress --to-stdout blockchain.db.gz |docker run --rm --interactive --network=testnet_lisk-test --env-file db.env --volume $(shell pwd)/.pgpass:/home/lisk/.pgpass lisk/testnet psql -w
-	docker run --rm --interactive --network=testnet_lisk-test --env-file db.env --volume $(shell pwd)/.pgpass:/home/lisk/.pgpass lisk/testnet psql -w --dbname=lisk --command="create table ready(id int);"
+	docker run --rm --interactive --network=testnet_lisk-test --env-file db.env lisk/testnet --volume $(shell pwd)/.pgpass:/home/lisk/.pgpass psql -w --dbname=lisk_restoring --command="\d" >/dev/null 2>&1 || sleep 10
+	gzip --decompress --to-stdout blockchain.db.gz |docker run --rm --interactive --network=testnet_lisk-test --env-file db.env --volume $(shell pwd)/.pgpass:/home/lisk/.pgpass lisk/testnet psql -w --dbname=lisk_restoring
+	docker run --rm --interactive --network=testnet_lisk-test --env-file db.env --volume $(shell pwd)/.pgpass:/home/lisk/.pgpass lisk/testnet psql -w --dbname=postgres --command="ALTER DATABASE lisk_restoring RENAME TO lisk_test;"
 	touch restore
 
 testnet: up restore

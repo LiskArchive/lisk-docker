@@ -31,7 +31,7 @@ jq_config ".redis.port = ${REDIS_PORT:=6380}"
 jq_config ".redis.db = ${REDIS_DB:=0}"
 jq_config ".cacheEnabled = ${REDIS_ENABLED:=false}"
 
-psql --dbname="$PGUSER" --command='\d ready' >/dev/null 2>&1
+psql --command='\d' >/dev/null 2>&1
 if [ "$?" -ne 0 ]; then
 	echo "Database is not ready."
 	sleep 60

@@ -31,6 +31,7 @@ services:
     environment:
       - POSTGRES_USER=lisk
       - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=lisk_restoring
 
   redis:
     image: redis
