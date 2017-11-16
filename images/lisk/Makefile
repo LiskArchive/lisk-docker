@@ -22,4 +22,4 @@ main: main-lisk-source.tar.gz lisk-node-Linux-x86_64.tar.gz
 	docker build --build-arg network=main --tag lisk/mainnet .
 
 clean:
-	rm -f lisk-*.tar.gz
+	rm -f *lisk-*.tar.gz

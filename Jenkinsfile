@@ -8,7 +8,9 @@ pipeline {
 		}
 		stage('docker build') {
 			steps {
-				sh 'make images'
+				ansiColor('xterm') {
+					sh 'make clean images'
+				}
 			}
 		}
 		stage('smoke tests') {
@@ -28,10 +30,10 @@ pipeline {
 		}
 	}
 	post {
-	    always {
-		ansiColor('xterm') {
-			sh 'make -C testnet mrproper'
+		always {
+			ansiColor('xterm') {
+				sh 'make -C testnet mrproper'
+			}
 		}
-	    }
 	}
 }

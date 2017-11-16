@@ -11,4 +11,4 @@ local: development.tar.gz lisk-node-Linux-x86_64.tar.gz
 	docker build --build-arg network=local --tag lisk/local .
 
 clean:
-	rm -f lisk-*.tar.gz
+	rm -f development.tar.gz lisk-*.tar.gz
