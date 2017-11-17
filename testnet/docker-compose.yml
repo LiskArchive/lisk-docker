@@ -1,0 +1,48 @@
+version: "3"
+services:
+
+  lisk:
+    image: lisk/testnet:latest
+    volumes:
+      - ./.pgpass:/home/lisk/.pgpass
+    ports:
+      - "7000:7000"
+    networks:
+      - lisk-test
+    depends_on:
+      - db
+      - redis
+    restart: on-failure
+    env_file:
+      - db.env
+    environment:
+      - REDIS_ENABLED=true
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - FORGING_WHITELIST_IP=127.0.0.1
+
+  db:
+    image: postgres:9.6
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    networks:
+      - lisk-test
+    restart: on-failure
+    environment:
+      - POSTGRES_USER=lisk
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=lisk_restoring
+
+  redis:
+    image: redis
+    ports:
+      - "6379"
+    networks:
+      - lisk-test
+    restart: on-failure
+
+networks:
+  lisk-test:
+
+volumes:
+  db-data:
