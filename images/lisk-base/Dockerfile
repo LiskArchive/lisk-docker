@@ -9,6 +9,7 @@ RUN apt-key add /tmp/pgdg.asc && \
         moreutils && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* && \
-    useradd lisk --shell /bin/bash && \
+    groupadd --gid 1100 lisk && \
+    useradd lisk --shell /bin/bash --uid 1100 --gid 1100 && \
     chown lisk:lisk -R /home/lisk && \
     chmod 1777 /tmp
