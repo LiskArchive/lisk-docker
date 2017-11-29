@@ -14,14 +14,14 @@ down:
 
 drop-database: up
 	docker-compose stop lisk
-	docker run --rm --interactive --network=local_lisk-local --env-file db.env --volume $(shell pwd)/.pgpass:/home/lisk/.pgpass lisk/local psql -w --dbname=postgres --command="DROP DATABASE IF EXISTS lisk_local;"
-	docker run --rm --interactive --network=local_lisk-local --env-file db.env --volume $(shell pwd)/.pgpass:/home/lisk/.pgpass lisk/local createdb -w lisk_restoring || true
+	docker run --rm --interactive --network=local_lisk-local --env-file db.env --volumes-from=local_lisk-config_1 lisk/local psql -w --dbname=postgres --command="DROP DATABASE IF EXISTS lisk_local;"
+	docker run --rm --interactive --network=local_lisk-local --env-file db.env --volumes-from=local_lisk-config_1 lisk/local createdb -w lisk_restoring || true
 	rm -f restore
 
 force-restore: drop-database restore
 	docker-compose start lisk
 
-local: up restore
+local: restore
 	@echo
 	@echo "All done; try the following:"
 	@echo "> cd local; docker-compose ps"
@@ -42,10 +42,10 @@ pgadmin:
 	@echo "  Username: $(shell grep PGUSER db.env |cut -d "=" -f 2 )"
 	@echo "  Password: $(shell grep POSTGRES_PASSWORD db.env |cut -d "=" -f 2 )"
 
-restore: blockchain.db.gz
-	docker run --rm --interactive --network=local_lisk-local --env-file db.env lisk/local --volume $(shell pwd)/.pgpass:/home/lisk/.pgpass psql -w --dbname=lisk_restoring --command="\d" >/dev/null 2>&1 || sleep 10
-	gzip --decompress --to-stdout blockchain.db.gz |docker run --rm --interactive --network=local_lisk-local --env-file db.env --volume $(shell pwd)/.pgpass:/home/lisk/.pgpass lisk/local psql -w --dbname=lisk_restoring
-	docker run --rm --interactive --network=local_lisk-local --env-file db.env --volume $(shell pwd)/.pgpass:/home/lisk/.pgpass lisk/local psql -w --dbname=postgres --command="ALTER DATABASE lisk_restoring RENAME TO lisk_local;"
+restore: blockchain.db.gz up
+	docker run --rm --interactive --network=local_lisk-local --env-file db.env --volumes-from=local_lisk-config_1 lisk/local psql -w --dbname=lisk_restoring --command="\d" >/dev/null 2>&1 || sleep 10
+	gzip --decompress --to-stdout blockchain.db.gz |docker run --rm --interactive --network=local_lisk-local --env-file db.env --volumes-from=local_lisk-config_1 lisk/local psql -w --dbname=lisk_restoring
+	docker run --rm --interactive --network=local_lisk-local --env-file db.env --volumes-from=local_lisk-config_1 lisk/local psql -w --dbname=postgres --command="ALTER DATABASE lisk_restoring RENAME TO lisk_local;"
 	touch restore
 
 up: .pgpass

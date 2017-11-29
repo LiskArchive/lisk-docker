@@ -25,7 +25,6 @@ RUN chown lisk:lisk -R /home/lisk
 ARG network=test
 ENV NETWORK=${network}
 
-VOLUME ["/home/lisk/lisk/logs"]
 USER lisk
 WORKDIR /home/lisk/lisk
 CMD ["/home/lisk/entrypoint.sh"]

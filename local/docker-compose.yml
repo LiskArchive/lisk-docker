@@ -1,21 +1,32 @@
-version: "3"
+version: "2"
 services:
+
+  lisk-config:
+    image: lisk/testnet:latest
+    volumes:
+      - ./.pgpass:/home/lisk/.pgpass
+    command: chown --verbose lisk:lisk /home/lisk/.pgpass
+    user: root
 
   lisk:
     image: lisk/local:latest
+    volumes_from:
+      - lisk-config
     volumes:
-      - ./.pgpass:/home/lisk/.pgpass
+      - lisk-logs:/home/lisk/lisk/logs/
     ports:
       - "4000:4000"
     networks:
       - lisk-local
     depends_on:
       - db
+      - lisk-config
       - redis
     restart: on-failure
     env_file:
       - db.env
     environment:
+      - LOG_LEVEL=debug
       - REDIS_ENABLED=true
       - REDIS_HOST=redis
       - REDIS_PORT=6379
@@ -28,13 +39,16 @@ services:
     networks:
       - lisk-local
     restart: on-failure
+    env_file:
+      - db.env
+    # environement takes priority over env_file
     environment:
-      - POSTGRES_USER=lisk
-      - POSTGRES_PASSWORD=password
       - POSTGRES_DB=lisk_restoring
 
   redis:
     image: redis
+    volumes:
+      - redis-data:/data
     ports:
       - "6379"
     networks:
@@ -46,3 +60,5 @@ networks:
 
 volumes:
   db-data:
+  lisk-logs:
+  redis-data:

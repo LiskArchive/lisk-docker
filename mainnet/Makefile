@@ -14,14 +14,14 @@ down:
 
 drop-database: up
 	docker-compose stop lisk
-	docker run --rm --interactive --network=mainnet_lisk-main --env-file db.env --volume $(shell pwd)/.pgpass:/home/lisk/.pgpass lisk/mainnet psql -w --dbname=postgres --command="DROP DATABASE IF EXISTS lisk_main;"
-	docker run --rm --interactive --network=mainnet_lisk-main --env-file db.env --volume $(shell pwd)/.pgpass:/home/lisk/.pgpass lisk/mainnet createdb -w lisk_restoring || true
+	docker run --rm --interactive --network=mainnet_lisk-main --env-file db.env --volumes-from=mainnet_lisk-config_1 lisk/mainnet psql -w --dbname=postgres --command="DROP DATABASE IF EXISTS lisk_main;"
+	docker run --rm --interactive --network=mainnet_lisk-main --env-file db.env --volumes-from=mainnet_lisk-config_1 lisk/mainnet createdb -w lisk_restoring || true
 	rm -f restore
 
 force-restore: drop-database restore
 	docker-compose start lisk
 
-mainnet: up restore
+mainnet: restore
 	@echo
 	@echo "All done; try the following:"
 	@echo "> cd mainnet; docker-compose ps"
@@ -42,10 +42,10 @@ pgadmin:
 	@echo "  Username: $(shell grep PGUSER db.env |cut -d "=" -f 2 )"
 	@echo "  Password: $(shell grep POSTGRES_PASSWORD db.env |cut -d "=" -f 2 )"
 
-restore: blockchain.db.gz
-	docker run --rm --interactive --network=mainnet_lisk-main --env-file db.env lisk/mainnet --volume $(shell pwd)/.pgpass:/home/lisk/.pgpass psql -w --dbname=lisk_restoring --command="\d" >/dev/null 2>&1 || sleep 10
-	gzip --decompress --to-stdout blockchain.db.gz |docker run --rm --interactive --network=mainnet_lisk-main --env-file db.env --volume $(shell pwd)/.pgpass:/home/lisk/.pgpass lisk/mainnet psql -w --dbname=lisk_restoring
-	docker run --rm --interactive --network=mainnet_lisk-main --env-file db.env --volume $(shell pwd)/.pgpass:/home/lisk/.pgpass lisk/mainnet psql -w --dbname=postgres --command="ALTER DATABASE lisk_restoring RENAME TO lisk_main;"
+restore: blockchain.db.gz up
+	docker run --rm --interactive --network=mainnet_lisk-main --env-file db.env --volumes-from=mainnet_lisk-config_1 lisk/mainnet psql -w --dbname=lisk_restoring --command="\d" >/dev/null 2>&1 || sleep 10
+	gzip --decompress --to-stdout blockchain.db.gz |docker run --rm --interactive --network=mainnet_lisk-main --env-file db.env --volumes-from=mainnet_lisk-config_1 lisk/mainnet psql -w --dbname=lisk_restoring
+	docker run --rm --interactive --network=mainnet_lisk-main --env-file db.env --volumes-from=mainnet_lisk-config_1 lisk/mainnet psql -w --dbname=postgres --command="ALTER DATABASE lisk_restoring RENAME TO lisk_main;"
 	touch restore
 
 up: .pgpass
