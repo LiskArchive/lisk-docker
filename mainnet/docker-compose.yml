@@ -5,6 +5,7 @@ services:
     image: lisk/testnet:latest
     volumes:
       - ./.pgpass:/home/lisk/.pgpass
+      - /home/lisk/config/
     command: chown --verbose lisk:lisk /home/lisk/.pgpass
     user: root
 
@@ -26,11 +27,11 @@ services:
     env_file:
       - db.env
     environment:
+      - FORGING_WHITELIST_IP=127.0.0.1
       - LOG_LEVEL=info
       - REDIS_ENABLED=true
       - REDIS_HOST=redis
       - REDIS_PORT=6379
-      - FORGING_WHITELIST_IP=127.0.0.1
 
   db:
     image: postgres:9.6
@@ -39,11 +40,10 @@ services:
     networks:
       - lisk-main
     restart: on-failure
-    env_file:
-      - db.env
-    # environement takes priority over env_file
     environment:
       - POSTGRES_DB=lisk_restoring
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_USER=lisk
 
   redis:
     image: redis
