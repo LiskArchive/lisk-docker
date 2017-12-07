@@ -20,12 +20,14 @@ FROM lisk-base
 
 RUN npm --quiet install --global --production lisky
 COPY --from=builder /home/lisk /home/lisk
-RUN chown lisk:lisk -R /home/lisk
+RUN mkdir /home/lisk/config && \
+    mv /home/lisk/lisk/config.json /home/lisk/config/ && \
+    ln -s ../config/config.json /home/lisk/lisk/config.json && \
+    chown lisk:lisk -R /home/lisk
 
 ARG network=test
 ENV NETWORK=${network}
 
-VOLUME ["/home/lisk/lisk/logs"]
 USER lisk
 WORKDIR /home/lisk/lisk
 CMD ["/home/lisk/entrypoint.sh"]
