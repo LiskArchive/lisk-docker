@@ -2,7 +2,7 @@ version: "2"
 services:
 
   lisk-config:
-    image: lisk/testnet:latest
+    image: lisk/local:latest
     volumes:
       - ./.pgpass:/home/lisk/.pgpass
       - /home/lisk/config/
