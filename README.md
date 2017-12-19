@@ -8,7 +8,7 @@
 
 ## Prerequisites
 
-### Install the Docker Engine and Docker Compose
+### Install Docker Engine and Docker Compose
 
 Please refer to the official documentation for
  - [Docker Engine](https://docs.docker.com/engine/installation) and
