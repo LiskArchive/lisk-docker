@@ -53,14 +53,9 @@ make pgadmin
 
 ***
 
-## Authors
+## Contributors
 
-- Oliver Beddows <oliver@lightcurve.io>
-- Michael Schmoock <michael@schmoock.net>
-- Isabella Dell <isabella@lightcurve.io>
-- Ruben Callewaert <rubencallewaertdev@gmail.com>
-- Diego Garcia <diego@lightcurve.io>
-- François Chavant <francois@lightcurve.io>
+https://github.com/LiskHQ/lisk-docker/graphs/contributors
 
 ## License
 
