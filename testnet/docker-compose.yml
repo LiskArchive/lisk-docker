@@ -1,0 +1,64 @@
+version: "2"
+services:
+
+  lisk-config:
+    image: lisk/testnet:latest
+    volumes:
+      - ./.pgpass:/home/lisk/.pgpass
+      - /home/lisk/config/
+    command: chown --verbose lisk:lisk /home/lisk/.pgpass
+    user: root
+
+  lisk:
+    image: lisk/testnet:latest
+    volumes_from:
+      - lisk-config
+    volumes:
+      - lisk-logs:/home/lisk/lisk/logs/
+    ports:
+      - "7000:7000"
+    networks:
+      - lisk-test
+    depends_on:
+      - db
+      - lisk-config
+      - redis
+    restart: on-failure
+    env_file:
+      - db.env
+    environment:
+      - FORGING_WHITELIST_IP=127.0.0.1
+      - LOG_LEVEL=debug
+      - REDIS_ENABLED=true
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+
+  db:
+    image: postgres:9.6
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    networks:
+      - lisk-test
+    restart: on-failure
+    environment:
+      - POSTGRES_DB=lisk_restoring
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_USER=lisk
+
+  redis:
+    image: redis
+    volumes:
+      - redis-data:/data
+    ports:
+      - "6379"
+    networks:
+      - lisk-test
+    restart: on-failure
+
+networks:
+  lisk-test:
+
+volumes:
+  db-data:
+  lisk-logs:
+  redis-data:

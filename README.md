@@ -1,157 +1,54 @@
 # Lisk Docker
 
-**The official Lisk docker image.** This document details how to build your own version of the image. If all you want to do is install the official Lisk docker image, please read the following: https://docs.lisk.io/docs/core-pre-installation-docker
+**The official Lisk docker image.** This document details how to build your own version of the image. If all you want to do is install the official Lisk docker image, please go to our public repository on Docker hub: https://hub.docker.com/u/lisk/
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](http://www.gnu.org/licenses/gpl-3.0)
 
 ***
 
+## Prerequisites
+
+### Install the Docker Engine and Docker Compose
+
+Please refer to the official documentation for
+ - [Docker Engine](https://docs.docker.com/engine/installation) and
+ - [Docker Compose](https://docs.docker.com/compose/install/)
+
+### Install make
+
+Install `make` on your system.
+
 ## Build Instructions
 
-**NOTE:** The following information is applicable to: **Ubuntu 14.04, 16.04 (LTS) or 16.10 - x86_64**.
+### Build the images
 
-If you are new to docker, we highly recommend reading the [Official Docker Documentation](https://docs.docker.com/) before proceeding.
+Decide which image you want to build and run:
 
-#### 1. Install Docker
+`make -C images <local|mainnet|testnet>`
 
-```
-curl -sL https://downloads.lisk.io/scripts/setup_docker.Linux | sudo -E bash -
-sudo apt-get install -y docker-engine
-```
-
-Add the current user to a new docker group (avoids having to use sudo for each command):
+E.g. to build test testnet image:
 
 ```
-sudo groupadd docker
-sudo gpasswd -a ${USER} docker
-sudo service docker restart
+make -C images testnet
 ```
 
-#### 2. Log into Docker
+### Run the images
+
+`make <local|mainnet|testnet>`
+
+E.g. to run a testnet image:
 
 ```
-docker login username
+make testnet
 ```
 
-**NOTE:** If you don't have a docker account you can sign up [here](https://hub.docker.com/).
+#### pgAdmin
 
-#### 3. Build the image
-
-```
-docker build -t username/lisk:latest -f Dockerfile.test .
-```
-
-#### 4. Tag the image
+If you wish you can start pgAdmin by running `make pgadmin` in one of the subdirectories, e.g.:
 
 ```
-docker tag username/lisk:latest username/lisk:version
-```
-
-#### 5. Push the image
-
-```
-docker push username/lisk
-```
-
-#### 6. Run the image
-
-```
-docker run -d --restart=always -p 0.0.0.0:7000:7000 username/lisk
-```
-
-For more details please read: https://github.com/LiskHQ/lisk-wiki/wiki/Docker-Install
-
-#### 7. Archive the image
-
-```
-docker save username/lisk > lisk-docker.tar
-gzip -9 lisk-docker.tar.gz
-```
-
-***
-
-## Using Docker Compose 
-
-#### 1. Starting a container with Docker Compose
-
-In order to start a Lisk-Docker installation, the following command should be run depending on the network:
-
-** Mainnet **
-```
-wget https://raw.githubusercontent.com/LiskHQ/lisk-docker/development/docker-compose-liskmain.yml
-docker-compose -f docker-compose-liskmain.yml up -d
-```
-
-** Testnet **
-
-```
-wget https://raw.githubusercontent.com/LiskHQ/lisk-docker/development/docker-compose-lisktest.yml
-docker-compose -f docker-compose-lisktest.yml up -d
-```
-
-#### 2. Stopping a container with Docker Compose
-
-** Mainnet **
-```
-docker-compose -f docker-compose-liskmain.yml down
-```
-
-** Testnet **
-
-```
-docker-compose -f docker-compose-lisktest.yml down
-```
-
-
-#### 3. Using an external postgresql database
-
-Passing the following environment variables to the container using `-e VARX=VALX` will allow you to connect to an external postgresql server or container:
-
-- DATABASE_HOST
-- DATABASE_PORT
-- DATABASE_NAME
-- DATABASE_USER
-- DATABASE_PASSWORD
-
-#### 4. Docker Compose File Usage
-
-Example:
-
-```
-version: '3'
-services:
-  lisk-node:
-    restart: always
-    image: lisk/mainnet:latest
-    ports:
-      - "8000:8000"
-    environment:
-      - DATABASE_HOST=postgresql
-      - DATABASE_NAME=lisk_main
-      - DATABASE_USER=lisk_main
-      - DATABASE_PASSWORD=password
-    links:
-      - PostgreSQL:postgresql
-  PostgreSQL:
-    restart: always
-    image: postgres:9.6.3
-    environment:
-      - POSTGRES_USER=lisk_main
-      - POSTGRES_PASSWORD=password
-```
-
-## Useful Commands
-
-#### Removing dangling images
-
-```
-docker rmi $(docker images -q -f "dangling=true")
-```
-
-#### Removing exited containers
-
-```
-docker rm $(docker ps -q -f status=exited)
+cd testnet
+make pgadmin
 ```
 
 ***
@@ -162,6 +59,8 @@ docker rm $(docker ps -q -f status=exited)
 - Michael Schmoock <michael@schmoock.net>
 - Isabella Dell <isabella@lightcurve.io>
 - Ruben Callewaert <rubencallewaertdev@gmail.com>
+- Diego Garcia <diego@lightcurve.io>
+- François Chavant <francois@lightcurve.io>
 
 ## License
 
