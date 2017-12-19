@@ -26,7 +26,7 @@ Decide which image you want to build and run:
 
 `make -C images <local|mainnet|testnet>`
 
-E.g. to build test testnet image:
+E.g. to build the testnet image:
 
 ```
 make -C images testnet
