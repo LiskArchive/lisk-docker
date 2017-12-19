@@ -46,7 +46,7 @@ services:
       - POSTGRES_USER=lisk
 
   redis:
-    image: redis
+    image: redis:alpine
     volumes:
       - redis-data:/data
     ports:
