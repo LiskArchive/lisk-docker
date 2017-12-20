@@ -34,7 +34,7 @@ services:
       - REDIS_PORT=6379
 
   db:
-    image: postgres:9.6
+    image: postgres:9.6-alpine
     volumes:
       - db-data:/var/lib/postgresql/data
     networks:
@@ -46,7 +46,7 @@ services:
       - POSTGRES_USER=lisk
 
   redis:
-    image: redis
+    image: redis:alpine
     volumes:
       - redis-data:/data
     ports:
