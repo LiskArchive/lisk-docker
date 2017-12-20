@@ -1,5 +1,5 @@
-.PHONY: all test
-all: test
+.PHONY: all base
+all: base
 
-test:
+base:
 	docker build -t lisk-base .
