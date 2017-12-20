@@ -14,10 +14,11 @@ USER lisk
 RUN cd /home/lisk/lisk && \
     npm --quiet install --production && \
     mkdir /home/lisk/config && \
-    cp -f /home/lisk/lisk/test/config.json /home/lisk/config/ && \
+    cp -f /home/lisk/lisk/test/data/config.json /home/lisk/config/ && \
+    rm -f /home/lisk/lisk/config.json && \
     ln -s ../config/config.json /home/lisk/lisk/config.json && \
-    cp -f /home/lisk/lisk/test/genesisBlock.json \
-	  /home/lisk/lisk/test/genesisDelegates.json /home/lisk/lisk/ && \
+    cp -f /home/lisk/lisk/test/data/genesisBlock.json \
+    /home/lisk/lisk/test/data/genesisDelegates.json /home/lisk/lisk/ && \
     jq -c ".db.database = \"lisk_local\"" config.json |sponge config.json && \
     jq -c ".dapp.masterpassword = \"local\"" config.json |sponge config.json
 
