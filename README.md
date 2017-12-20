@@ -2,13 +2,14 @@
 
 **The official Lisk docker image.** This document details how to build your own version of the image. If all you want to do is install the official Lisk docker image, please go to our public repository on Docker hub: https://hub.docker.com/u/lisk/
 
+[![Build Status](https://jenkins.lisk.io/buildStatus/icon?job=lisk-docker/development)](https://jenkins.lisk.io/job/lisk-docker/job/development)
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](http://www.gnu.org/licenses/gpl-3.0)
 
 ***
 
 ## Prerequisites
 
-### Install the Docker Engine and Docker Compose
+### Install Docker Engine and Docker Compose
 
 Please refer to the official documentation for
  - [Docker Engine](https://docs.docker.com/engine/installation) and
@@ -26,7 +27,7 @@ Decide which image you want to build and run:
 
 `make -C images <local|mainnet|testnet>`
 
-E.g. to build test testnet image:
+E.g. to build the testnet image:
 
 ```
 make -C images testnet
@@ -53,14 +54,9 @@ make pgadmin
 
 ***
 
-## Authors
+## Contributors
 
-- Oliver Beddows <oliver@lightcurve.io>
-- Michael Schmoock <michael@schmoock.net>
-- Isabella Dell <isabella@lightcurve.io>
-- Ruben Callewaert <rubencallewaertdev@gmail.com>
-- Diego Garcia <diego@lightcurve.io>
-- François Chavant <francois@lightcurve.io>
+https://github.com/LiskHQ/lisk-docker/graphs/contributors
 
 ## License
 
