@@ -49,8 +49,6 @@ services:
     image: redis:alpine
     volumes:
       - redis-data:/data
-    ports:
-      - "6379"
     networks:
       - lisk-main
     restart: on-failure
