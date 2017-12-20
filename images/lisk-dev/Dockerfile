@@ -8,7 +8,6 @@ RUN apt-get update && \
 
 ADD development.tar.gz /home/lisk/
 RUN mv /home/lisk/lisk-development /home/lisk/lisk
-ADD lisk-node-Linux-x86_64.tar.gz /home/lisk/lisk/
 RUN chown lisk:lisk -R /home/lisk
 USER lisk
 RUN cd /home/lisk/lisk && \
