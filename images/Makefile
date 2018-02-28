@@ -1,19 +1,11 @@
-.PHONY: all clean lisk-base mainnet testnet
-
-all: local mainnet testnet
+.PHONY: all clean mainnet testnet
+all: testnet mainnet
 
 clean:
 	make -C lisk clean
-	make -C lisk-dev clean
 
-lisk-base:
-	make -C lisk-base
+mainnet:
+	make -C lisk mainnet
 
-local: lisk-base
-	make -C lisk-dev
-
-mainnet: lisk-base
-	make -C lisk main
-
-testnet: lisk-base
-	make -C lisk test
+testnet:
+	make -C lisk testnet

@@ -1,0 +1,48 @@
+version: "2"
+services:
+
+  lisk:
+    image: lisk/mainnet
+    volumes:
+      - lisk-logs:/home/lisk/lisk/logs/
+    ports:
+      - "8000:8000"
+    networks:
+      - lisk-main
+    depends_on:
+      - db
+    restart: on-failure
+    command: ["/home/lisk/wait-for-it.sh", "db:5432", "--", "/home/lisk/run.sh"]
+    environment:
+      - LISK_CONFIG_CONSOLE_LOG_LEVEL=warn
+      - LISK_CONFIG_DB_DATABASE=lisk_main
+
+  db:
+    image: postgres:9.6-alpine
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    networks:
+      - lisk-main
+    restart: on-failure
+    environment:
+      - POSTGRES_DB=lisk_main
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_USER=lisk
+
+  task:
+    image: postgres:9.6-alpine
+    networks:
+      - lisk-main
+    environment:
+      - PGUSER=lisk
+      - PGPASSWORD=password
+      - PGDATABASE=lisk_main
+      - PGHOST=db
+    command: /bin/true
+
+networks:
+  lisk-main:
+
+volumes:
+  db-data:
+  lisk-logs:

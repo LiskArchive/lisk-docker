@@ -1,0 +1,33 @@
+version: "2"
+services:
+
+  lisk:
+    image: lisk/testnet:next
+    volumes:
+      - lisk-logs:/home/lisk/lisk/logs/
+    ports:
+      - "7000:7000"
+    networks:
+      - lisk-test
+    depends_on:
+      - db
+    restart: on-failure
+
+  db:
+    image: postgres:9.6-alpine
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    networks:
+      - lisk-test
+    restart: on-failure
+    environment:
+      - POSTGRES_DB=lisk_test
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_USER=lisk
+
+networks:
+  lisk-test:
+
+volumes:
+  db-data:
+  lisk-logs:

@@ -1,32 +1,20 @@
-FROM lisk-base AS builder
+FROM ubuntu:16.04
 
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get --assume-yes install --no-install-recommends \
-        build-essential \
-        jq \
-        moreutils
+        curl sudo unzip wget zip \
+        jq moreutils && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
-ADD lisk-source.tar.gz /home/lisk/
-RUN mv /home/lisk/lisk-source /home/lisk/lisk
-RUN chown lisk:lisk -R /home/lisk
-USER lisk
-RUN cd /home/lisk/lisk && \
-    npm --quiet install --production && \
-    jq -c ".api.access.public = true" config.json |sponge config.json
+RUN groupadd --gid 1100 lisk && \
+    useradd lisk --create-home --home-dir /home/lisk --shell /bin/bash --uid 1100 --gid 1100
 
-
-FROM lisk-base
-
-RUN npm --quiet install --global --production lisky
-COPY --from=builder /home/lisk /home/lisk
-RUN mkdir /home/lisk/config && \
-    mv /home/lisk/lisk/config.json /home/lisk/config/ && \
-    ln -s ../config/config.json /home/lisk/lisk/config.json && \
-    chown lisk:lisk -R /home/lisk
-
-ARG network=test
-ENV NETWORK=${network}
+# the chown flag does not work with tarballs
+ADD lisk-Linux-x86_64.tar.gz /home/lisk/
+RUN chown lisk:lisk --recursive /home/lisk/lisk-Linux-x86_64
+COPY --chown=lisk:lisk files/ /
 
 USER lisk
-WORKDIR /home/lisk/lisk
-CMD ["/home/lisk/entrypoint.sh"]
+WORKDIR /home/lisk/lisk-Linux-x86_64
+CMD ["/home/lisk/run.sh"]

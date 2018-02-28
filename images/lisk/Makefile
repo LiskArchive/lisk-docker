@@ -1,22 +1,22 @@
-.PHONY: all clean test
-all: test
+.PHONY: all clean testnet
+all: testnet mainnet
 
-test-lisk-source.tar.gz:
-	curl https://downloads.lisk.io/lisk/test/lisk-source.tar.gz --output test-lisk-source.tar.gz
+testnet-lisk-Linux-x86_64.tar.gz:
+	curl https://downloads.lisk.io/lisk/test/lisk-Linux-x86_64.tar.gz --output testnet-lisk-Linux-x86_64.tar.gz
 
-main-lisk-source.tar.gz:
-	curl https://downloads.lisk.io/lisk/main/lisk-source.tar.gz --output main-lisk-source.tar.gz
+mainnet-lisk-Linux-x86_64.tar.gz:
+	curl https://downloads.lisk.io/lisk/main/lisk-Linux-x86_64.tar.gz --output mainnet-lisk-Linux-x86_64.tar.gz
 
-test: test-lisk-source.tar.gz
-	# the ADD instruction does support build-time variables
-	rm -f lisk-source.tar.gz
-	ln test-lisk-source.tar.gz lisk-source.tar.gz
-	docker build --build-arg network=test --tag lisk/testnet .
+testnet: testnet-lisk-Linux-x86_64.tar.gz
+	# the ADD instruction does not support build-time variables
+	rm -f lisk-Linux-x86_64.tar.gz
+	ln testnet-lisk-Linux-x86_64.tar.gz lisk-Linux-x86_64.tar.gz
+	docker build --tag lisk/testnet .
 
-main: main-lisk-source.tar.gz
-	rm -f lisk-source.tar.gz
-	ln main-lisk-source.tar.gz lisk-source.tar.gz
-	docker build --build-arg network=main --tag lisk/mainnet .
+mainnet: mainnet-lisk-Linux-x86_64.tar.gz
+	rm -f lisk-Linux-x86_64.tar.gz
+	ln mainnet-lisk-Linux-x86_64.tar.gz lisk-Linux-x86_64.tar.gz
+	docker build --tag lisk/mainnet .
 
 clean:
-	rm -f *lisk-*.tar.gz
+	rm -f *lisk-Linux-x86_64.tar.gz
