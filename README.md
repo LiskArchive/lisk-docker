@@ -25,7 +25,7 @@ Install `make` on your system.
 
 Decide which image you want to build and run:
 
-`make -C images <local|mainnet|testnet>`
+`make -C images <mainnet|testnet>`
 
 E.g. to build the testnet image:
 
@@ -33,26 +33,86 @@ E.g. to build the testnet image:
 make -C images testnet
 ```
 
-### Run the images
+### Run images using docker-compose
 
-`make <local|mainnet|testnet>`
+There are examples for testnet and mainnet in the `examples/`directory.
 
-E.g. to run a testnet image:
+#### Examples for testnet
 
-```
-make testnet
-```
+`cd examples/testnet/`
 
-#### pgAdmin
-
-If you wish you can start pgAdmin by running `make pgadmin` in one of the subdirectories, e.g.:
+##### Start Lisk
 
 ```
-cd testnet
-make pgadmin
+make up
 ```
 
-***
+##### Rebuild database from blockchain snapshot
+
+```
+make coldstart
+```
+
+##### Rebuild database from latest blockchain snapshot
+
+Delete any previously downloaded blockchain.db.gz ensure the latest is downloaded:
+
+```
+make clean
+make coldstart
+```
+
+##### Stop Lisk
+
+```
+docker-compose stop
+```
+
+
+##### Delete all containers
+
+```
+docker-compose down --volumes
+```
+
+#### Upgrade
+
+Create a new container without exposing it, wait until it catches up, stop the old container and expose the new one.
+
+```
+cp -r examples/testnet/ new_testnet/
+cd new_testnet/
+# edit `docker-compose.yml` to not expose port 7000
+make coldstart
+# make sure everything works
+```
+
+#### Customize config.json
+
+Those environment variables that can be used to customize `config.json` inside a container:
+- `LISK_CONFIG_CONSOLE_LOG_LEVEL`
+- `LISK_CONFIG_FORGING_WHITELIST_IP`
+- `LISK_CONFIG_DB_HOST`
+- `LISK_CONFIG_DB_PORT`
+- `LISK_CONFIG_DB_DATABASE`
+- `LISK_CONFIG_DB_USER`
+- `LISK_CONFIG_DATABASE_PASSWORD`
+
+To customize other parts of `config.json` create your own image and add your custom config.json like so:
+
+```
+mkdir my_lisk
+cd my_lisk/
+docker run --rm lisk/testnet cat config.json >config.json
+cat << EOF >Dockerfile
+FROM lisk/testnet
+
+COPY >config.json /home/lisk/lisk-Linux-x86_64/config.json
+EOF
+docker build --tag my_lisk/testnet .
+```
+
+Then use `my_lisk/test` in your `docker-compose.yml` file.
 
 ## Contributors
 

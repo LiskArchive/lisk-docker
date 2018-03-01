@@ -1,8 +1,11 @@
 .PHONY: clean coldstart mrproper up
 all: up
 
+lisk_net = test
+lisk_database = lisk_$(lisk_net)
+
 blockchain.db.gz:
-	curl -O https://downloads.lisk.io/lisk/test/blockchain.db.gz
+	curl -O https://downloads.lisk.io/lisk/$(lisk_net)/blockchain.db.gz
 
 up:
 	docker-compose up -d
@@ -10,8 +13,8 @@ up:
 coldstart: blockchain.db.gz up
 	docker-compose stop lisk
 	docker-compose start db
-	docker-compose run task dropdb --if-exists lisk_test
-	docker-compose run task createdb lisk_test
+	docker-compose run task dropdb --if-exists $(lisk_database)
+	docker-compose run task createdb $(lisk_database)
 	gzip --decompress --to-stdout blockchain.db.gz |docker-compose run task psql >/dev/null
 	docker-compose start lisk
 
