@@ -41,6 +41,24 @@ There are examples for testnet and mainnet in the `examples/`directory.
 
 `cd examples/testnet/`
 
+By default the examples use the `latest` version. Make sure to pull it with:
+
+```
+docker-compose pull
+```
+
+Alternatively you can change the example `docker-compose.yml` file to use a specific version by changing the `image: lisk/testnet` line to `image: lisk/tesnet:<VERSION>`.
+For instance if you want to use version `0.9.12a` your `docker-compose.yml` should look like this:
+
+```
+version: "2"
+services:
+
+  lisk:
+      image: lisk/testnet:0.9.12a
+[...]
+```
+
 ##### Start Lisk
 
 ```
@@ -104,10 +122,11 @@ To customize other parts of `config.json` create your own image and add your cus
 mkdir my_lisk
 cd my_lisk/
 docker run --rm lisk/testnet cat config.json >config.json
+# edit config.json
 cat << EOF >Dockerfile
 FROM lisk/testnet
 
-COPY >config.json /home/lisk/lisk-Linux-x86_64/config.json
+COPY config.json /home/lisk/lisk-Linux-x86_64/config.json
 EOF
 docker build --tag my_lisk/testnet .
 ```
