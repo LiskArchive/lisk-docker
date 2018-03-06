@@ -16,9 +16,6 @@ RUN groupadd --gid 1100 lisk && \
 ADD ${network}-lisk-Linux-x86_64.tar.gz /home/lisk/
 RUN chown lisk:lisk --recursive /home/lisk/lisk-Linux-x86_64
 COPY --chown=lisk:lisk files/ /
-RUN if [ $network = "local" ]; then \
-        cp /home/lisk/.local/*.json /home/lisk/lisk-Linux-x86_64/; \
-    fi
 
 USER lisk
 WORKDIR /home/lisk/lisk-Linux-x86_64
