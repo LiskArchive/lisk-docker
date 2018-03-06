@@ -13,9 +13,9 @@ up:
 coldstart: blockchain.db.gz up
 	docker-compose stop lisk
 	docker-compose start db
-	docker-compose run task dropdb --if-exists $(lisk_database)
-	docker-compose run task createdb $(lisk_database)
-	gzip --decompress --to-stdout blockchain.db.gz |docker-compose run task psql >/dev/null
+	docker-compose run --rm task dropdb --if-exists $(lisk_database)
+	docker-compose run --rm task createdb $(lisk_database)
+	gzip --decompress --to-stdout blockchain.db.gz |docker-compose run --rm task psql >/dev/null
 	docker-compose start lisk
 
 clean:

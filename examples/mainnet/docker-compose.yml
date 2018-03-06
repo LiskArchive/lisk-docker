@@ -2,7 +2,7 @@ version: "2"
 services:
 
   lisk:
-    image: lisk/mainnet
+    image: lisk/mainnet:next
     volumes:
       - lisk-logs:/home/lisk/lisk/logs/
     ports:
