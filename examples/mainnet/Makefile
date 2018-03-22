@@ -15,6 +15,7 @@ coldstart: blockchain.db.gz up
 	docker-compose start db
 	docker-compose run --rm task dropdb --if-exists $(lisk_database)
 	docker-compose run --rm task createdb $(lisk_database)
+	@echo Restoring database snapshot. This can take a few minutes.
 	gzip --decompress --to-stdout blockchain.db.gz |docker-compose run --rm task psql >/dev/null
 	docker-compose start lisk
 
