@@ -6,6 +6,15 @@ tag = next
 clean:
 	rm -f *-lisk-Linux-x86_64.tar.gz*
 
+betanet-lisk-Linux-x86_64.tar.gz:
+	curl --fail https://downloads.lisk.io/lisk/beta/lisk-Linux-x86_64.tar.gz --output betanet-lisk-Linux-x86_64.tar.gz
+	curl --fail https://downloads.lisk.io/lisk/beta/lisk-Linux-x86_64.tar.gz.SHA256 --output betanet-lisk-Linux-x86_64.tar.gz.SHA256
+	sed -i 's/  \(lisk-Linux-x86_64.tar.gz\)/  betanet-\1/' betanet-lisk-Linux-x86_64.tar.gz.SHA256
+	sha256sum -c betanet-lisk-Linux-x86_64.tar.gz.SHA256
+
+betanet: betanet-lisk-Linux-x86_64.tar.gz
+	docker build --build-arg network=betanet --tag lisk/betanet:$(tag) .
+
 development-lisk-Linux-x86_64.tar.gz:
 	curl --fail https://downloads.lisk.io/lisk/development/lisk-Linux-x86_64.tar.gz --output development-lisk-Linux-x86_64.tar.gz
 	curl --fail https://downloads.lisk.io/lisk/development/lisk-Linux-x86_64.tar.gz.SHA256 --output development-lisk-Linux-x86_64.tar.gz.SHA256
@@ -32,4 +41,3 @@ testnet-lisk-Linux-x86_64.tar.gz:
 
 testnet: testnet-lisk-Linux-x86_64.tar.gz
 	docker build --tag lisk/testnet:$(tag) .
-
