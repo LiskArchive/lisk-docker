@@ -1,0 +1,48 @@
+version: "2"
+services:
+
+  lisk:
+    image: lisk/betanet:next
+    volumes:
+      - lisk-logs:/home/lisk/lisk/logs/
+    ports:
+      - "5000:5000"
+      - "5001:5001"
+    networks:
+      - lisk-beta
+    depends_on:
+      - db
+    command: ["/home/lisk/wait-for-it.sh", "db:5432", "--", "/home/lisk/run.sh"]
+    environment:
+      - LISK_CONFIG_DB_DATABASE=lisk_beta
+    restart: on-failure
+
+  db:
+    image: postgres:9.6-alpine
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    networks:
+      - lisk-beta
+    restart: on-failure
+    environment:
+      - POSTGRES_DB=lisk_beta
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_USER=lisk
+
+  task:
+    image: postgres:9.6-alpine
+    networks:
+      - lisk-beta
+    environment:
+      - PGUSER=lisk
+      - PGPASSWORD=password
+      - PGDATABASE=lisk_beta
+      - PGHOST=db
+    command: /bin/true
+
+networks:
+  lisk-beta:
+
+volumes:
+  db-data:
+  lisk-logs:
