@@ -4,7 +4,7 @@ function jq_config {
 	jq -c "$1" config.json |sponge config.json
 }
 
-jq -c ".api.access.public = true" config.json |sponge config.json
+jq_config ".api.access.public = true"
 
 jq_config ".consoleLogLevel = \"${LISK_CONFIG_CONSOLE_LOG_LEVEL:=info}\""
 

@@ -1,0 +1,45 @@
+version: "2"
+services:
+
+  lisk:
+    image: lisk/development:${LISK_VERSION}
+    volumes:
+      - lisk-logs:/home/lisk/lisk/logs/
+    ports:
+      - 4000
+    networks:
+      - lisk-development
+    depends_on:
+      - db
+    command: ["/home/lisk/wait-for-it.sh", "db:5432", "--", "/home/lisk/run.sh"]
+    restart: on-failure
+
+  db:
+    image: postgres:9.6-alpine
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    networks:
+      - lisk-development
+    restart: on-failure
+    environment:
+      - POSTGRES_DB=lisk_test
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_USER=lisk
+
+  task:
+    image: postgres:9.6-alpine
+    networks:
+      - lisk-development
+    environment:
+      - PGUSER=lisk
+      - PGPASSWORD=password
+      - PGDATABASE=lisk_test
+      - PGHOST=db
+    command: /bin/true
+
+networks:
+  lisk-development:
+
+volumes:
+  db-data:
+  lisk-logs:

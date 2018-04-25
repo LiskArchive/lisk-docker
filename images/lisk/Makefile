@@ -6,6 +6,15 @@ tag = next
 clean:
 	rm -f *-lisk-Linux-x86_64.tar.gz*
 
+development-lisk-Linux-x86_64.tar.gz:
+	curl --fail https://downloads.lisk.io/lisk/development/lisk-Linux-x86_64.tar.gz --output development-lisk-Linux-x86_64.tar.gz
+	curl --fail https://downloads.lisk.io/lisk/development/lisk-Linux-x86_64.tar.gz.SHA256 --output development-lisk-Linux-x86_64.tar.gz.SHA256
+	sed -i 's/  \(lisk-Linux-x86_64.tar.gz\)/  development-\1/' development-lisk-Linux-x86_64.tar.gz.SHA256
+	sha256sum -c development-lisk-Linux-x86_64.tar.gz.SHA256
+
+development: development-lisk-Linux-x86_64.tar.gz
+	docker build --build-arg network=development --tag lisk/development:$(tag) .
+
 mainnet-lisk-Linux-x86_64.tar.gz:
 	curl --fail https://downloads.lisk.io/lisk/main/lisk-Linux-x86_64.tar.gz --output mainnet-lisk-Linux-x86_64.tar.gz
 	curl --fail https://downloads.lisk.io/lisk/main/lisk-Linux-x86_64.tar.gz.SHA256 --output mainnet-lisk-Linux-x86_64.tar.gz.SHA256
