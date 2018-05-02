@@ -1,4 +1,10 @@
-all: testnet mainnet
+.PHONY: all clean testnet
+all: base betanet
 
-%:
-	make -C lisk $@
+tag = next
+
+base:
+	make -C lisk
+
+betanet:
+	docker build --build-arg network=betanet --tag lisk/betanet:$(version) --build-arg version="$(version)" --build-arg minVersion="$(minversion)" -f Dockerfile.betanet .
