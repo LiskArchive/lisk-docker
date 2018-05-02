@@ -2,7 +2,7 @@ version: "2"
 services:
 
   lisk:
-    image: lisk/betanet:next
+    image: lisk/betanet:1.0.0-beta.6
     volumes:
       - lisk-logs:/home/lisk/lisk/logs/
     ports:
@@ -14,7 +14,9 @@ services:
       - db
     command: ["/home/lisk/wait-for-it.sh", "db:5432", "--", "/home/lisk/run.sh"]
     environment:
-      - LISK_CONFIG_DB_DATABASE=lisk_beta
+      - LISK_DB_NAME=lisk_beta
+      - LISK_DB_HOST=db
+      - LISK_REDIS_HOST=redis
     restart: on-failure
 
   db:

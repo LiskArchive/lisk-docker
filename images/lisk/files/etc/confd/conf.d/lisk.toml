@@ -1,0 +1,6 @@
+[template]
+src = "config.json.tmpl"
+dest = "/home/lisk/lisk-Linux-x86_64/config.json"
+keys = [
+    "/lisk",
+]

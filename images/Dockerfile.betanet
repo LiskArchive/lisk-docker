@@ -1,0 +1,36 @@
+FROM lisk/base
+
+ARG network=betanet
+ARG version
+ARG minVersion
+
+# download and verify image
+RUN curl --fail https://downloads.lisk.io/lisk/beta/lisk-Linux-x86_64.tar.gz --output betanet-lisk-Linux-x86_64.tar.gz && \
+    curl --fail https://downloads.lisk.io/lisk/beta/lisk-Linux-x86_64.tar.gz.SHA256 --output betanet-lisk-Linux-x86_64.tar.gz.SHA256 && \
+    sed -i 's/  \(lisk-Linux-x86_64.tar.gz\)/  betanet-\1/' betanet-lisk-Linux-x86_64.tar.gz.SHA256 && \
+    sha256sum -c betanet-lisk-Linux-x86_64.tar.gz.SHA256 && \
+    rm betanet-lisk-Linux-x86_64.tar.gz.SHA256
+
+# unpack the binaries
+RUN tar -xzf betanet-lisk-Linux-x86_64.tar.gz && \
+    rm betanet-lisk-Linux-x86_64.tar.gz && \
+    chown lisk:lisk --recursive /home/lisk/lisk-Linux-x86_64
+
+ENV VERSION ${version}
+ENV MIN_VERSION ${minVersion}
+
+# add seed nodes
+ENV LISK_PEERS_LIST_1 "94.237.41.99:5001"
+ENV LISK_PEERS_LIST_2 "209.50.52.217:5001"
+ENV LISK_PEERS_LIST_3 "94.237.26.150:5001"
+ENV LISK_PEERS_LIST_4 "83.136.249.102:5001"
+ENV LISK_PEERS_LIST_5 "94.237.65.179:5001"
+
+# set nethash
+ENV LISK_NETHASH "ef3844327d1fd0fc5785291806150c937797bdb34a748c9cd932b7e859e9ca0c"
+ENV LISK_WSPORT "5001"
+ENV LISK_HTTPPORT "5000"
+
+USER lisk
+WORKDIR /home/lisk/lisk-Linux-x86_64
+CMD ["/home/lisk/run.sh"]
