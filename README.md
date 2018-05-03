@@ -23,19 +23,19 @@ Install `make` on your system.
 
 ### Build the images
 
-Decide which image you want to build and run:
+Decide which flavour and version you want to build and run:
 
-`make -C images <mainnet|testnet>`
+`make tag=<version> -C images/lisk <mainnet|testnet|betanet|development>`
 
-E.g. to build the testnet image:
+E.g. to build the testnet 0.9.14a image:
 
 ```
-make -C images testnet
+make tag=0.9.14a -C images/lisk testnet
 ```
 
 ### Run images using docker-compose
 
-There are examples for testnet and mainnet in the `examples/`directory.
+There are examples for development, betanet, testnet and mainnet in the `examples/`directory.
 
 #### Examples for testnet
 
