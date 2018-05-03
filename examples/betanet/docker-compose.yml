@@ -2,7 +2,7 @@ version: "2"
 services:
 
   lisk:
-    image: lisk/betanet:next
+    image: lisk/betanet:latest
     volumes:
       - lisk-logs:/home/lisk/lisk/logs/
     ports:
