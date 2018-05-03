@@ -1,43 +1,33 @@
-.PHONY: all clean testnet
-all: testnet mainnet
+check-tag:
+	@: $(if $(tag),,$(error $$tag must be set))
+	@echo Tag: $(tag)
 
-tag = next
-
+.PHONY: clean
 clean:
-	rm -f *-lisk-Linux-x86_64.tar.gz*
+	rm -f lisk-*-Linux-x86_64.tar.gz*
 
-betanet-lisk-Linux-x86_64.tar.gz:
-	curl --fail https://downloads.lisk.io/lisk/beta/lisk-Linux-x86_64.tar.gz --output betanet-lisk-Linux-x86_64.tar.gz
-	curl --fail https://downloads.lisk.io/lisk/beta/lisk-Linux-x86_64.tar.gz.SHA256 --output betanet-lisk-Linux-x86_64.tar.gz.SHA256
-	sed -i 's/  \(lisk-Linux-x86_64.tar.gz\)/  betanet-\1/' betanet-lisk-Linux-x86_64.tar.gz.SHA256
-	sha256sum -c betanet-lisk-Linux-x86_64.tar.gz.SHA256
+# different flavours will never have the same version number (tag)
+lisk-%-Linux-x86_64.tar.gz: check-tag
+	wget --no-verbose --continue https://downloads.lisk.io/lisk/$(network)/$(tag)/lisk-$(tag)-Linux-x86_64.tar.gz
+	wget --no-verbose --continue https://downloads.lisk.io/lisk/$(network)/$(tag)/lisk-$(tag)-Linux-x86_64.tar.gz.SHA256
+	sha256sum -c lisk-$(tag)-Linux-x86_64.tar.gz.SHA256
 
-betanet: betanet-lisk-Linux-x86_64.tar.gz
-	docker build --build-arg network=betanet --tag lisk/betanet:$(tag) .
+.PHONY: betanet
+betanet: network=beta
+betanet: check-tag lisk-$(tag)-Linux-x86_64.tar.gz
+	docker build --pull --build-arg tag=$(tag) --tag lisk/$@:$(tag) .
 
-development-lisk-Linux-x86_64.tar.gz:
-	curl --fail https://downloads.lisk.io/lisk/development/lisk-Linux-x86_64.tar.gz --output development-lisk-Linux-x86_64.tar.gz
-	curl --fail https://downloads.lisk.io/lisk/development/lisk-Linux-x86_64.tar.gz.SHA256 --output development-lisk-Linux-x86_64.tar.gz.SHA256
-	sed -i 's/  \(lisk-Linux-x86_64.tar.gz\)/  development-\1/' development-lisk-Linux-x86_64.tar.gz.SHA256
-	sha256sum -c development-lisk-Linux-x86_64.tar.gz.SHA256
+.PHONY: development
+development: network=development
+development: check-tag lisk-$(tag)-Linux-x86_64.tar.gz
+	docker build --pull --build-arg tag=$(tag) --tag lisk/$@:$(tag) .
 
-development: development-lisk-Linux-x86_64.tar.gz
-	docker build --build-arg network=development --tag lisk/development:$(tag) .
+.PHONY: testnet
+testnet: network=test
+testnet: check-tag lisk-$(tag)-Linux-x86_64.tar.gz
+	docker build --pull --build-arg tag=$(tag) --tag lisk/$@:$(tag) .
 
-mainnet-lisk-Linux-x86_64.tar.gz:
-	curl --fail https://downloads.lisk.io/lisk/main/lisk-Linux-x86_64.tar.gz --output mainnet-lisk-Linux-x86_64.tar.gz
-	curl --fail https://downloads.lisk.io/lisk/main/lisk-Linux-x86_64.tar.gz.SHA256 --output mainnet-lisk-Linux-x86_64.tar.gz.SHA256
-	sed -i 's/  \(lisk-Linux-x86_64.tar.gz\)/  mainnet-\1/' mainnet-lisk-Linux-x86_64.tar.gz.SHA256
-	sha256sum -c mainnet-lisk-Linux-x86_64.tar.gz.SHA256
-
-mainnet: mainnet-lisk-Linux-x86_64.tar.gz
-	docker build --build-arg network=mainnet --tag lisk/mainnet:$(tag) .
-
-testnet-lisk-Linux-x86_64.tar.gz:
-	curl --fail https://downloads.lisk.io/lisk/test/lisk-Linux-x86_64.tar.gz --output testnet-lisk-Linux-x86_64.tar.gz
-	curl --fail https://downloads.lisk.io/lisk/test/lisk-Linux-x86_64.tar.gz.SHA256 --output testnet-lisk-Linux-x86_64.tar.gz.SHA256
-	sed -i 's/  \(lisk-Linux-x86_64.tar.gz\)/  testnet-\1/' testnet-lisk-Linux-x86_64.tar.gz.SHA256
-	sha256sum -c testnet-lisk-Linux-x86_64.tar.gz.SHA256
-
-testnet: testnet-lisk-Linux-x86_64.tar.gz
-	docker build --tag lisk/testnet:$(tag) .
+.PHONY: mainnet
+mainnet: network=main
+mainnet: check-tag lisk-$(tag)-Linux-x86_64.tar.gz
+	docker build --pull --build-arg tag=$(tag) --tag lisk/$@:$(tag) .

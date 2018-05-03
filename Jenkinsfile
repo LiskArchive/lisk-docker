@@ -4,8 +4,12 @@ pipeline {
 		stage('docker build') {
 			steps {
 				ansiColor('xterm') {
-					dir('images/') {
-						sh 'make'
+					dir('images/lisk/') {
+						sh '''
+						LATEST=$( curl --silent --show-error https://downloads.lisk.io/lisk/development/latest.txt )
+						make tag=$LATEST development
+						docker tag lisk/development:$LATEST lisk/development:latest
+						'''
 					}
 				}
 			}
@@ -13,7 +17,7 @@ pipeline {
 		stage('smoke tests') {
 			steps {
 				ansiColor('xterm') {
-					dir('examples/testnet/') {
+					dir('examples/development/') {
 						sh 'make'
 						retry(3) {
 							sleep 10
@@ -31,7 +35,7 @@ pipeline {
 	post {
 		always {
 			ansiColor('xterm') {
-				dir('examples/testnet/') {
+				dir('examples/development/') {
 					sh 'make mrproper'
 				}
 			}
