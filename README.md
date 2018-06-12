@@ -1,8 +1,7 @@
 # Lisk Docker
 
-**The official Lisk docker image.** This document details how to build your own version of the image. If all you want to do is install the official Lisk docker image, please go to our public repository on Docker hub: https://hub.docker.com/u/lisk/
+The official Lisk docker images can be found in our public repository on the Docker Hub: https://hub.docker.com/u/lisk/
 
-[![Build Status](https://jenkins.lisk.io/buildStatus/icon?job=lisk-docker/development)](https://jenkins.lisk.io/job/lisk-docker/job/development)
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](http://www.gnu.org/licenses/gpl-3.0)
 
 ***
@@ -19,59 +18,26 @@ Please refer to the official documentation for
 
 Install `make` on your system.
 
-## Build Instructions
+## Usage
 
-### Build the images
+There are example `docker-compose.yml` files for `mainnet`, `testnet` and `betanet` in the `examples/` directory.
+A `Makefile` is also included to make restoring from a snapshot easier.
 
-Decide which image you want to build and run:
+All commands must be run in the directory where the `docker-compose.yml` file lives.
 
-`make -C images <mainnet|testnet>`
-
-E.g. to build the testnet image:
-
-```
-make -C images testnet
-```
-
-### Run images using docker-compose
-
-There are examples for testnet and mainnet in the `examples/`directory.
-
-#### Examples for testnet
-
-`cd examples/testnet/`
-
-By default the examples use the `latest` version. Make sure to pull it with:
-
-```
-docker-compose pull
-```
-
-Alternatively you can change the example `docker-compose.yml` file to use a specific version by changing the `image: lisk/testnet` line to `image: lisk/tesnet:<VERSION>`.
-For instance if you want to use version `0.9.12a` your `docker-compose.yml` should look like this:
-
-```
-version: "2"
-services:
-
-  lisk:
-      image: lisk/testnet:0.9.12a
-[...]
-```
-
-##### Start Lisk
+### Start Lisk
 
 ```
 make up
 ```
 
-##### Rebuild database from blockchain snapshot
+### Rebuild database from snapshot
 
 ```
 make coldstart
 ```
 
-##### Rebuild database from latest blockchain snapshot
+### Rebuild database from latest snapshot
 
 Delete any previously downloaded blockchain.db.gz ensure the latest is downloaded:
 
@@ -80,58 +46,18 @@ make clean
 make coldstart
 ```
 
-##### Stop Lisk
+### Stop Lisk
 
 ```
 docker-compose stop
 ```
 
 
-##### Delete all containers
+### Delete all containers
 
 ```
 docker-compose down --volumes
 ```
-
-#### Upgrade
-
-Create a new container without exposing it, wait until it catches up, stop the old container and expose the new one.
-
-```
-cp -r examples/testnet/ new_testnet/
-cd new_testnet/
-# edit `docker-compose.yml` to not expose port 7000
-make coldstart
-# make sure everything works
-```
-
-#### Customize config.json
-
-Those environment variables that can be used to customize `config.json` inside a container:
-- `LISK_CONFIG_CONSOLE_LOG_LEVEL`
-- `LISK_CONFIG_FORGING_WHITELIST_IP`
-- `LISK_CONFIG_DB_HOST`
-- `LISK_CONFIG_DB_PORT`
-- `LISK_CONFIG_DB_DATABASE`
-- `LISK_CONFIG_DB_USER`
-- `LISK_CONFIG_DATABASE_PASSWORD`
-
-To customize other parts of `config.json` create your own image and add your custom config.json like so:
-
-```
-mkdir my_lisk
-cd my_lisk/
-docker run --rm lisk/testnet cat config.json >config.json
-# edit config.json
-cat << EOF >Dockerfile
-FROM lisk/testnet
-
-COPY config.json /home/lisk/lisk-Linux-x86_64/config.json
-EOF
-docker build --tag my_lisk/testnet .
-```
-
-Then use `my_lisk/test` in your `docker-compose.yml` file.
 
 ## Contributors
 
