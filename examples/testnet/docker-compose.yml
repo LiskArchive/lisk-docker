@@ -2,17 +2,20 @@ version: "2"
 services:
 
   lisk:
-    image: lisk/testnet:next
+    image: lisk/testnet:1.0.0-rc.1
     volumes:
       - lisk-logs:/home/lisk/lisk/logs/
     ports:
       - "7000:7000"
+      - "7001:7001"
     networks:
       - lisk-test
     depends_on:
       - db
-    command: ["/home/lisk/wait-for-it.sh", "db:5432", "--", "/home/lisk/run.sh"]
     restart: on-failure
+    command: ["/home/lisk/wait-for-it.sh", "db:5432", "--", "/home/lisk/run.sh"]
+    environment:
+      - LISK_DB_HOST=db
 
   db:
     image: postgres:9.6-alpine
