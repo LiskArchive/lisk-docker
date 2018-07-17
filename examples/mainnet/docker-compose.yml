@@ -29,7 +29,7 @@ services:
       #- LISK_FORGING_ACCESS_WHITELIST_1=YOUR_IP
 
   db:
-    image: postgres:9.6-alpine
+    image: postgres:10-alpine
     volumes:
       - db-data:/var/lib/postgresql/data
     networks:
@@ -41,7 +41,7 @@ services:
       - POSTGRES_USER=lisk
 
   task:
-    image: postgres:9.6-alpine
+    image: postgres:10-alpine
     networks:
       - lisk-main
     environment:
