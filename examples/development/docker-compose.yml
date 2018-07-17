@@ -18,9 +18,9 @@ services:
     environment:
       - LISK_CONSOLELOGLEVEL=debug
       - LISK_DB_HOST=db
-      - LISK_DB_USER=${ENV_LISK_USER}
-      - LISK_DB_PASSWORD=${ENV_LISK_PASSWORD}
-      - LISK_DB_DATABASE=${ENV_LISK_DATABASE}
+      - LISK_DB_USER=${ENV_LISK_DB_USER}
+      - LISK_DB_PASSWORD=${ENV_LISK_DB_PASSWORD}
+      - LISK_DB_DATABASE=${ENV_LISK_DB_DATABASE}
       - LISK_CACHEENABLED=false
 
   db:
@@ -31,18 +31,18 @@ services:
       - lisk
     restart: on-failure
     environment:
-      - POSTGRES_DB=${ENV_LISK_DATABASE}
-      - POSTGRES_PASSWORD=${ENV_LISK_PASSWORD}
-      - POSTGRES_USER=${ENV_LISK_USER}
+      - POSTGRES_DB=${ENV_LISK_DB_DATABASE}
+      - POSTGRES_PASSWORD=${ENV_LISK_DB_PASSWORD}
+      - POSTGRES_USER=${ENV_LISK_DB_USER}
 
   task:
     image: postgres:10-alpine
     networks:
       - lisk
     environment:
-      - PGUSER=${ENV_LISK_USER}
-      - PGPASSWORD=${ENV_LISK_PASSWORD}
-      - PGDATABASE=${ENV_LISK_DATABASE}
+      - PGUSER=${ENV_LISK_DB_USER}
+      - PGPASSWORD=${ENV_LISK_DB_PASSWORD}
+      - PGDATABASE=${ENV_LISK_DB_DATABASE}
       - PGHOST=db
     command: /bin/true
 
