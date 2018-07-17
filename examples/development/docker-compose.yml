@@ -2,46 +2,52 @@ version: "2"
 services:
 
   lisk:
-    image: lisk/development:${LISK_VERSION}
+    image: lisk/core:${ENV_LISK_VERSION}
     volumes:
       - lisk-logs:/home/lisk/lisk/logs/
     ports:
-      - 4000
-      - 5000
+      - ${ENV_LISK_HTTP_PORT}:${ENV_LISK_HTTP_PORT}
+      - ${ENV_LISK_WS_PORT}:${ENV_LISK_WS_PORT}
     networks:
-      - lisk-development
+      - lisk
     depends_on:
       - db
     restart: on-failure
-    command: ["/home/lisk/wait-for-it.sh", "db:5432", "--", "/home/lisk/run.sh"]
+    entrypoint: ["/home/lisk/wait-for-it.sh", "db:5432", "--", "/home/lisk/run.sh"]
+    command: ["-n", "${ENV_LISK_NETWORK}"]
     environment:
+      - LISK_CONSOLELOGLEVEL=debug
       - LISK_DB_HOST=db
+      - LISK_DB_USER=${ENV_LISK_USER}
+      - LISK_DB_PASSWORD=${ENV_LISK_PASSWORD}
+      - LISK_DB_DATABASE=${ENV_LISK_DATABASE}
+      - LISK_CACHEENABLED=false
 
   db:
     image: postgres:10-alpine
     volumes:
       - db-data:/var/lib/postgresql/data
     networks:
-      - lisk-development
+      - lisk
     restart: on-failure
     environment:
-      - POSTGRES_DB=lisk_test
-      - POSTGRES_PASSWORD=password
-      - POSTGRES_USER=lisk
+      - POSTGRES_DB=${ENV_LISK_DATABASE}
+      - POSTGRES_PASSWORD=${ENV_LISK_PASSWORD}
+      - POSTGRES_USER=${ENV_LISK_USER}
 
   task:
     image: postgres:10-alpine
     networks:
-      - lisk-development
+      - lisk
     environment:
-      - PGUSER=lisk
-      - PGPASSWORD=password
-      - PGDATABASE=lisk_test
+      - PGUSER=${ENV_LISK_USER}
+      - PGPASSWORD=${ENV_LISK_PASSWORD}
+      - PGDATABASE=${ENV_LISK_DATABASE}
       - PGHOST=db
     command: /bin/true
 
 networks:
-  lisk-development:
+  lisk:
 
 volumes:
   db-data:
