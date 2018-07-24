@@ -16,7 +16,6 @@ services:
     entrypoint: ["/home/lisk/wait-for-it.sh", "db:5432", "--", "/home/lisk/run.sh"]
     command: ["-n", "${ENV_LISK_NETWORK}"]
     environment:
-      - LISK_CONSOLELOGLEVEL=debug
       - LISK_DB_HOST=db
       - LISK_DB_USER=${ENV_LISK_DB_USER}
       - LISK_DB_PASSWORD=${ENV_LISK_DB_PASSWORD}
