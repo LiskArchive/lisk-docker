@@ -2,7 +2,7 @@ version: "2"
 services:
 
   lisk:
-    image: lisk/testnet:1.0.0-rc.1
+    image: lisk/testnet:1.0.0-rc.2
     volumes:
       - lisk-logs:/home/lisk/lisk/logs/
     ports:
