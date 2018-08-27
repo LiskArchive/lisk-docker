@@ -2,7 +2,7 @@ version: "2"
 services:
 
   lisk:
-    image: lisk/mainnet:1.0.0
+    image: lisk/mainnet:1.0.1
     volumes:
       - lisk-logs:/home/lisk/lisk/logs/
     ports:
