@@ -20,7 +20,7 @@ Install `make` on your system.
 
 ## Usage
 
-There are example `docker-compose.yml` files for `mainnet`, `testnet` and `betanet` in the `examples/` directory.
+There are example `.env` files for `mainnet`, `testnet` and `development` in the `examples/` directory.
 A `Makefile` is also included to make restoring from a snapshot easier.
 
 All commands must be run in the directory where the `docker-compose.yml` file lives.
