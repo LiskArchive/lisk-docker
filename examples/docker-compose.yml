@@ -32,6 +32,8 @@ services:
 # change 'YOUR_IP' to you actual IP address
       #- LISK_API_WHITELIST=YOUR_IP
       #- LISK_FORGING_WHITELIST=YOUR_IP
+# uncomment the following to set your own peer:
+      #- LISK_PEERS_LIST_1=PEER_IP:PEER_WSPORT
 
   db:
     image: postgres:10-alpine
