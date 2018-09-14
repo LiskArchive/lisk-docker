@@ -1,1 +1,2 @@
-blockchain.db.gz
+.env
+*blockchain.db.gz
