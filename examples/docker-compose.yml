@@ -35,11 +35,22 @@ services:
 # you will need to use your own encrypted key (use lisk-commander to encrypt it)
       #- LISK_FORGING_DELEGATES_1=salt=d25cb9fd7c0b9935f4abc59388aceb74&cipherText=122096545efdd048eda72552883db00ff62ca3925a8d870a5c6380a043b45372adea1698755b73b7ef8c2f2269907b04c77aac38f7094f08c147eccbc6a3bb62c374252e39acf4519b8d&iv=03781f7ba5ba16ffd8d93edb&tag=55e7d26c9dbd35d011938d38fea13602&version=1:eadd8a8bb1a7283147aa7006c8b5f9f2b871d789f36207dfd44039ed44c1d572
 # uncomment the following lines to allow access to the API
-# change 'YOUR_IP' to you actual IP address
-      #- LISK_API_ACCESS_WHITELIST_1=YOUR_IP
-      #- LISK_FORGING_ACCESS_WHITELIST_1=YOUR_IP
+# '172.16.0.0/12' encompasses all possible docker container IPs, change as needed
+      #- LISK_API_ACCESS_WHITELIST_2=172.16.0.0/12
+      #- LISK_FORGING_ACCESS_WHITELIST_2=172.16.0.0/12
 # uncomment the following to set your own peer:
       #- LISK_PEERS_LIST_1=PEER_IP:PEER_WSPORT
+
+# Uncomment to enable forging automatically
+# You will need to your actual public key and password below and set LISK_FORGING_ACCESS_WHITELIST_1=172.16.0.0/12 (see above)
+#  lisk-task:
+#    image: lisk/core:${ENV_LISK_VERSION}
+#    networks:
+#      - lisk
+#    entrypoint: ["/home/lisk/wait-for-it.sh", "lisk:${ENV_LISK_HTTP_PORT}", "--"]
+#    command: ["curl", "--silent", "--request", "PUT", "--data",
+#        "{\"forging\":true,\"password\":\"foo bar baz\",\"publicKey\":\"eadd8a8bb1a7283147aa7006c8b5f9f2b871d789f36207dfd44039ed44c1d572\"}",
+#        "--header", "Content-Type:application/json", "http://lisk:${ENV_LISK_HTTP_PORT}/api/node/status/forging"]
 
   db:
     image: postgres:10-alpine
@@ -53,7 +64,7 @@ services:
       - POSTGRES_PASSWORD=${ENV_LISK_DB_PASSWORD}
       - POSTGRES_USER=${ENV_LISK_DB_USER}
 
-  task:
+  db-task:
     image: postgres:10-alpine
     networks:
       - lisk

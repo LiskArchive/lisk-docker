@@ -19,10 +19,10 @@ up:
 coldstart: $(lisk_net)_blockchain.db.gz up
 	docker-compose stop lisk
 	docker-compose start db
-	docker-compose run --rm task dropdb --if-exists $(lisk_db)
-	docker-compose run --rm task createdb $(lisk_db)
+	docker-compose run --rm db-task dropdb --if-exists $(lisk_db)
+	docker-compose run --rm db-task createdb $(lisk_db)
 	@echo Restoring database snapshot. This can take a few minutes.
-	gzip --decompress --to-stdout $(lisk_net)_blockchain.db.gz |docker-compose run --rm task psql >/dev/null
+	gzip --decompress --to-stdout $(lisk_net)_blockchain.db.gz |docker-compose run --rm db-task psql >/dev/null
 	docker-compose start lisk
 
 clean:
