@@ -10,9 +10,9 @@ services:
       - ${ENV_LISK_WS_PORT}:${ENV_LISK_WS_PORT}
     networks:
       - lisk
+    restart: unless-stopped
     depends_on:
       - db
-    restart: on-failure
     entrypoint: ["/home/lisk/wait-for-it.sh", "db:5432", "--", "/home/lisk/run.sh"]
     command: ["-n", "${ENV_LISK_NETWORK}"]
     environment:
@@ -47,6 +47,7 @@ services:
 #    image: lisk/core:${ENV_LISK_VERSION}
 #    networks:
 #      - lisk
+#    restart: on-failure
 #    entrypoint: ["/home/lisk/wait-for-it.sh", "lisk:${ENV_LISK_HTTP_PORT}", "--"]
 #    command: ["curl", "--silent", "--request", "PUT", "--data",
 #        "{\"forging\":true,\"password\":\"foo bar baz\",\"publicKey\":\"eadd8a8bb1a7283147aa7006c8b5f9f2b871d789f36207dfd44039ed44c1d572\"}",
@@ -56,9 +57,9 @@ services:
     image: postgres:10-alpine
     volumes:
       - db-data:/var/lib/postgresql/data
+    restart: unless-stopped
     networks:
       - lisk
-    restart: on-failure
     environment:
       - POSTGRES_DB=${ENV_LISK_DB_DATABASE}
       - POSTGRES_PASSWORD=${ENV_LISK_DB_PASSWORD}
@@ -80,7 +81,7 @@ services:
 #    image: redis:alpine
 #    networks:
 #      - lisk
-#    restart: on-failure
+#    restart: unless-stopped
 
 networks:
   lisk:
