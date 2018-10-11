@@ -70,6 +70,7 @@ services:
 #    networks:
 #      - lisk
 #    restart: on-failure
+#    command: --maxclients 500 --tcp-backlog 128 --maxmemory-policy allkeys-lru --save ""
 
 networks:
   lisk:
